@@ -33,4 +33,18 @@ void main() {
 
     expect(find.text('Nenhuma transação cadastrada'), findsOneWidget);
   });
+
+  testWidgets('opens new transaction route from action button', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nova transação'), findsWidgets);
+    expect(
+      find.text('O formulário será implementado no próximo bloco.'),
+      findsOneWidget,
+    );
+  });
 }

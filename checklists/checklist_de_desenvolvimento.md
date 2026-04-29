@@ -153,13 +153,13 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 - [x] Criar bottom navigation
 - [ ] Criar rotas principais:
-  - [ ] Dashboard
-  - [ ] Transações
-  - [ ] Nova transação
-  - [ ] Contas
-  - [ ] Cartões
-  - [ ] Mais/configurações
-- [ ] Definir comportamento do botão de nova transação
+  - [x] Dashboard
+  - [x] Transações
+  - [x] Nova transação
+  - [x] Contas
+  - [x] Cartões
+  - [x] Mais/configurações
+- [x] Definir comportamento do botão de nova transação
 
 ---
 
