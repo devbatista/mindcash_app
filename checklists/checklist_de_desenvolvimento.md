@@ -129,23 +129,23 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 6. Design system simples
 
-- [ ] Definir paleta principal
-- [ ] Definir cores semânticas:
-  - [ ] Receita
-  - [ ] Despesa
-  - [ ] Transferência
-  - [ ] Alerta/erro
-- [ ] Definir tipografia base
-- [ ] Definir espaçamentos padrão
+- [x] Definir paleta principal
+- [x] Definir cores semânticas:
+  - [x] Receita
+  - [x] Despesa
+  - [x] Transferência
+  - [x] Alerta/erro
+- [x] Definir tipografia base
+- [x] Definir espaçamentos padrão
 - [x] Criar tema claro
-- [ ] Criar componentes reutilizáveis:
-  - [ ] Botão primário
-  - [ ] Campo de texto
-  - [ ] Campo monetário
-  - [ ] Seletor de data
-  - [ ] Item de lista de transação
-  - [ ] Empty state
-  - [ ] Loading state
+- [x] Criar componentes reutilizáveis:
+  - [x] Botão primário
+  - [x] Campo de texto
+  - [x] Campo monetário
+  - [x] Seletor de data
+  - [x] Item de lista de transação
+  - [x] Empty state
+  - [x] Loading state
 
 ---
 

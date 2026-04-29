@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:mindcash_app/core/theme/app_colors.dart';
 
 final class AppTheme {
   const AppTheme._();
 
   static ThemeData light() {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0F766E),
+      seedColor: AppColors.primary,
       brightness: Brightness.light,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: const Color(0xFFF7F8FA),
+      fontFamily: null,
+      scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFFF7F8FA),
-        foregroundColor: Color(0xFF111827),
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: Colors.white,
+        color: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: Color(0xFFE5E7EB)),
+          side: const BorderSide(color: AppColors.border),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         indicatorColor: colorScheme.primaryContainer,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
