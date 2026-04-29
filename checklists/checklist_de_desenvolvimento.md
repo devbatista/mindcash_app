@@ -56,8 +56,8 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 - [x] Criar arquivo principal do banco
 - [x] Configurar geração de código
 - [x] Criar migração inicial
-- [ ] Criar helper para abrir banco no app
-- [ ] Criar estratégia simples para testes com banco em memória
+- [x] Criar helper para abrir banco no app
+- [x] Criar estratégia simples para testes com banco em memória
 
 ### Campos padrão para sync futura
 

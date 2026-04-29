@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 
 void main() {
+  late AppDatabase database;
+
+  setUp(() {
+    database = AppDatabase.memory();
+  });
+
+  tearDown(() async {
+    await database.close();
+  });
+
   testWidgets('shows the MindCash app shell', (tester) async {
-    await tester.pumpWidget(const MindCashApp());
+    await tester.pumpWidget(MindCashApp(database: database));
     await tester.pump();
 
     expect(find.text('Olá, DevBatista'), findsOneWidget);
@@ -14,7 +25,7 @@ void main() {
   });
 
   testWidgets('navigates between main sections', (tester) async {
-    await tester.pumpWidget(const MindCashApp());
+    await tester.pumpWidget(MindCashApp(database: database));
     await tester.pump();
 
     await tester.tap(find.text('Transações'));
