@@ -179,15 +179,15 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 9. Tela: Transações
 
-- [ ] Listar transações recentes
-- [ ] Agrupar por data
-- [ ] Filtro por tipo
-- [ ] Filtro por período
-- [ ] Busca por descrição
-- [ ] Abrir detalhes da transação
-- [ ] Editar transação
-- [ ] Deletar transação com confirmação
-- [ ] Swipe para deletar opcional
+- [x] Listar transações recentes
+- [x] Agrupar por data
+- [x] Filtro por tipo
+- [x] Filtro por período
+- [x] Busca por descrição
+- [x] Abrir detalhes da transação
+- [x] Editar transação
+- [x] Deletar transação com confirmação
+- [x] Swipe para deletar opcional
 
 ---
 

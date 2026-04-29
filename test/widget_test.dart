@@ -34,7 +34,7 @@ void main() {
     await tester.tap(find.text('Transações'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nenhuma transação cadastrada'), findsOneWidget);
+    expect(find.text('Nenhuma transação encontrada'), findsOneWidget);
   });
 
   testWidgets('opens new transaction route from action button', (tester) async {
@@ -108,6 +108,49 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Transações'), findsWidgets);
-    expect(find.text('Nenhuma transação cadastrada'), findsOneWidget);
+    expect(find.text('Compra'), findsOneWidget);
+  });
+
+  testWidgets('filters and searches transactions', (tester) async {
+    final accountRepository = AccountRepository(database);
+    final transactionRepository = TransactionRepository(database);
+    final account = await accountRepository.createAccount(
+      name: 'Carteira',
+      type: 'wallet',
+    );
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 1000,
+      description: 'Mercado',
+      date: DateTime.now(),
+      sourceAccountId: account.id,
+    );
+    await transactionRepository.createTransaction(
+      type: 'income',
+      amountCents: 2000,
+      description: 'Salário',
+      date: DateTime.now(),
+      sourceAccountId: account.id,
+    );
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Transações'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mercado'), findsOneWidget);
+    expect(find.text('Salário'), findsOneWidget);
+
+    await tester.tap(find.text('Despesas'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mercado'), findsOneWidget);
+    expect(find.text('Salário'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), 'mer');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mercado'), findsOneWidget);
   });
 }
