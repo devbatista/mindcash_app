@@ -52,10 +52,10 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 - [x] Escolher banco local: Drift
 - [x] Adicionar dependências do Drift
-- [ ] Configurar banco local
-- [ ] Criar arquivo principal do banco
-- [ ] Configurar geração de código
-- [ ] Criar migração inicial
+- [x] Configurar banco local
+- [x] Criar arquivo principal do banco
+- [x] Configurar geração de código
+- [x] Criar migração inicial
 - [ ] Criar helper para abrir banco no app
 - [ ] Criar estratégia simples para testes com banco em memória
 
