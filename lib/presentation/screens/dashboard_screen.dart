@@ -6,17 +6,33 @@ import 'package:mindcash_app/domain/models/dashboard_summary.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
 import 'package:mindcash_app/presentation/widgets/transaction_list_item.dart';
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({required this.summary, super.key});
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({
+    required this.summary,
+    required this.selectedMonth,
+    required this.onMonthChanged,
+    required this.onShowAllTransactions,
+    super.key,
+  });
 
   final DashboardSummary summary;
+  final DateTime selectedMonth;
+  final ValueChanged<DateTime> onMonthChanged;
+  final VoidCallback onShowAllTransactions;
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  var _isBalanceVisible = true;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 120),
       children: [
-        _GreetingHeader(userName: summary.userName),
+        _GreetingHeader(userName: widget.summary.userName),
         const SizedBox(height: 28),
         const Text(
           'Visão geral',
@@ -27,15 +43,35 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        _BalanceCard(summary: summary),
+        _BalanceCard(
+          summary: widget.summary,
+          isVisible: _isBalanceVisible,
+          onVisibilityChanged: () {
+            setState(() => _isBalanceVisible = !_isBalanceVisible);
+          },
+        ),
         const SizedBox(height: 26),
-        _MonthSummary(summary: summary),
+        _MonthSummary(
+          summary: widget.summary,
+          selectedMonth: widget.selectedMonth,
+          onMonthChanged: widget.onMonthChanged,
+          isBalanceVisible: _isBalanceVisible,
+        ),
         const SizedBox(height: 30),
-        _AccountsSection(accounts: summary.accountCards),
+        _AccountsSection(
+          accounts: widget.summary.accountCards,
+          isBalanceVisible: _isBalanceVisible,
+        ),
         const SizedBox(height: 30),
-        _CategorySection(items: summary.categoryExpenses),
+        _CategorySection(
+          items: widget.summary.categoryExpenses,
+          onShowAllTransactions: widget.onShowAllTransactions,
+        ),
         const SizedBox(height: 30),
-        _RecentTransactionsSection(transactions: summary.recentTransactions),
+        _RecentTransactionsSection(
+          transactions: widget.summary.recentTransactions,
+          isBalanceVisible: _isBalanceVisible,
+        ),
       ],
     );
   }
@@ -61,9 +97,15 @@ class _GreetingHeader extends StatelessWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.summary});
+  const _BalanceCard({
+    required this.summary,
+    required this.isVisible,
+    required this.onVisibilityChanged,
+  });
 
   final DashboardSummary summary;
+  final bool isVisible;
+  final VoidCallback onVisibilityChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -83,9 +125,9 @@ class _BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: Text(
                   'Saldo total',
                   style: TextStyle(
@@ -95,12 +137,21 @@ class _BalanceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(Icons.visibility_outlined, color: Colors.white, size: 24),
+              IconButton(
+                onPressed: onVisibilityChanged,
+                tooltip: isVisible ? 'Ocultar valores' : 'Mostrar valores',
+                color: Colors.white,
+                icon: Icon(
+                  isVisible
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            MoneyFormatter.brl(summary.totalBalanceCents),
+            _formatMoney(summary.totalBalanceCents, isVisible),
             style: const TextStyle(
               fontSize: 34,
               height: 1.1,
@@ -114,13 +165,13 @@ class _BalanceCard extends StatelessWidget {
               Expanded(
                 child: _BalanceBreakdown(
                   label: 'Contas',
-                  value: MoneyFormatter.brl(summary.accountsBalanceCents),
+                  value: _formatMoney(summary.accountsBalanceCents, isVisible),
                 ),
               ),
               Expanded(
                 child: _BalanceBreakdown(
                   label: 'Cartões',
-                  value: MoneyFormatter.brl(summary.cardsBalanceCents),
+                  value: _formatMoney(summary.cardsBalanceCents, isVisible),
                 ),
               ),
             ],
@@ -165,9 +216,17 @@ class _BalanceBreakdown extends StatelessWidget {
 }
 
 class _MonthSummary extends StatelessWidget {
-  const _MonthSummary({required this.summary});
+  const _MonthSummary({
+    required this.summary,
+    required this.selectedMonth,
+    required this.onMonthChanged,
+    required this.isBalanceVisible,
+  });
 
   final DashboardSummary summary;
+  final DateTime selectedMonth;
+  final ValueChanged<DateTime> onMonthChanged;
+  final bool isBalanceVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -186,27 +245,34 @@ class _MonthSummary extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    summary.monthLabel,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+            InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () => _showMonthSelector(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      summary.monthLabel,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF111827),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.keyboard_arrow_down, size: 20),
-                ],
+                    const SizedBox(width: 8),
+                    const Icon(Icons.keyboard_arrow_down, size: 20),
+                  ],
+                ),
               ),
             ),
           ],
@@ -229,19 +295,28 @@ class _MonthSummary extends StatelessWidget {
             children: [
               _SummaryRow(
                 label: 'Receitas',
-                value: MoneyFormatter.brl(summary.monthlyIncomeCents),
+                value: _formatMoney(
+                  summary.monthlyIncomeCents,
+                  isBalanceVisible,
+                ),
                 valueColor: const Color(0xFF43A047),
               ),
               const _Divider(),
               _SummaryRow(
                 label: 'Despesas',
-                value: MoneyFormatter.brl(summary.monthlyExpenseCents),
+                value: _formatMoney(
+                  summary.monthlyExpenseCents,
+                  isBalanceVisible,
+                ),
                 valueColor: const Color(0xFFE05252),
               ),
               const _Divider(),
               _SummaryRow(
                 label: 'Resultado',
-                value: MoneyFormatter.brl(summary.monthlyResultCents),
+                value: _formatMoney(
+                  summary.monthlyResultCents,
+                  isBalanceVisible,
+                ),
                 valueColor: const Color(0xFF43A047),
               ),
             ],
@@ -249,6 +324,20 @@ class _MonthSummary extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _showMonthSelector(BuildContext context) async {
+    final selected = await showModalBottomSheet<DateTime>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return _MonthSelectorSheet(selectedMonth: selectedMonth);
+      },
+    );
+
+    if (selected != null) {
+      onMonthChanged(selected);
+    }
   }
 }
 
@@ -303,9 +392,13 @@ class _Divider extends StatelessWidget {
 }
 
 class _CategorySection extends StatelessWidget {
-  const _CategorySection({required this.items});
+  const _CategorySection({
+    required this.items,
+    required this.onShowAllTransactions,
+  });
 
   final List<DashboardCategorySummary> items;
+  final VoidCallback onShowAllTransactions;
 
   @override
   Widget build(BuildContext context) {
@@ -320,9 +413,9 @@ class _CategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Text(
                 'Gastos por categoria',
                 style: TextStyle(
@@ -332,12 +425,15 @@ class _CategorySection extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              'Ver todas',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF6D3FD9),
+            TextButton(
+              onPressed: onShowAllTransactions,
+              child: const Text(
+                'Ver todas',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF6D3FD9),
+                ),
               ),
             ),
           ],
@@ -367,9 +463,13 @@ class _CategorySection extends StatelessWidget {
 }
 
 class _AccountsSection extends StatelessWidget {
-  const _AccountsSection({required this.accounts});
+  const _AccountsSection({
+    required this.accounts,
+    required this.isBalanceVisible,
+  });
 
   final List<DashboardAccountSummary> accounts;
+  final bool isBalanceVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -394,13 +494,16 @@ class _AccountsSection extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 104,
+          height: 120,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               final account = accounts[index];
 
-              return _AccountCard(account: account);
+              return _AccountCard(
+                account: account,
+                isBalanceVisible: isBalanceVisible,
+              );
             },
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemCount: accounts.length,
@@ -412,9 +515,10 @@ class _AccountsSection extends StatelessWidget {
 }
 
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({required this.account});
+  const _AccountCard({required this.account, required this.isBalanceVisible});
 
   final DashboardAccountSummary account;
+  final bool isBalanceVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +532,6 @@ class _AccountCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             account.name,
@@ -440,8 +543,9 @@ class _AccountCard extends StatelessWidget {
               color: Color(0xFF111827),
             ),
           ),
+          const Spacer(),
           Text(
-            MoneyFormatter.brl(account.balanceCents),
+            _formatMoney(account.balanceCents, isBalanceVisible),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
@@ -455,9 +559,13 @@ class _AccountCard extends StatelessWidget {
 }
 
 class _RecentTransactionsSection extends StatelessWidget {
-  const _RecentTransactionsSection({required this.transactions});
+  const _RecentTransactionsSection({
+    required this.transactions,
+    required this.isBalanceVisible,
+  });
 
   final List<DashboardTransactionSummary> transactions;
+  final bool isBalanceVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -493,8 +601,9 @@ class _RecentTransactionsSection extends StatelessWidget {
                 TransactionListItem(
                   description: transaction.description,
                   categoryName: transaction.categoryName,
-                  amountCents: transaction.amountCents,
+                  amountCents: isBalanceVisible ? transaction.amountCents : 0,
                   type: transaction.type,
+                  hiddenAmountLabel: isBalanceVisible ? null : '••••',
                 ),
             ],
           ),
@@ -502,6 +611,59 @@ class _RecentTransactionsSection extends StatelessWidget {
       ],
     );
   }
+}
+
+class _MonthSelectorSheet extends StatelessWidget {
+  const _MonthSelectorSheet({required this.selectedMonth});
+
+  final DateTime selectedMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: 12,
+        itemBuilder: (context, index) {
+          final month = DateTime(selectedMonth.year, index + 1);
+          final isSelected = month.month == selectedMonth.month;
+
+          return ListTile(
+            title: Text(_monthLabel(month)),
+            trailing: isSelected ? const Icon(Icons.check) : null,
+            onTap: () => Navigator.of(context).pop(month),
+          );
+        },
+      ),
+    );
+  }
+
+  String _monthLabel(DateTime date) {
+    const months = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ];
+
+    return '${months[date.month - 1]}/${date.year}';
+  }
+}
+
+String _formatMoney(int cents, bool isVisible) {
+  if (!isVisible) {
+    return '••••';
+  }
+
+  return MoneyFormatter.brl(cents);
 }
 
 class _CompactEmptySection extends StatelessWidget {

@@ -8,6 +8,7 @@ class TransactionListItem extends StatelessWidget {
     required this.categoryName,
     required this.amountCents,
     required this.type,
+    this.hiddenAmountLabel,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class TransactionListItem extends StatelessWidget {
   final String categoryName;
   final int amountCents;
   final String type;
+  final String? hiddenAmountLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,8 @@ class TransactionListItem extends StatelessWidget {
       ),
       subtitle: Text(categoryName),
       trailing: Text(
-        MoneyFormatter.brl(type == 'expense' ? -amountCents : amountCents),
+        hiddenAmountLabel ??
+            MoneyFormatter.brl(type == 'expense' ? -amountCents : amountCents),
         style: TextStyle(color: amountColor, fontWeight: FontWeight.w800),
       ),
     );

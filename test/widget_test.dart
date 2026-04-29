@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
+import 'package:mindcash_app/data/repositories/account_repository.dart';
+import 'package:mindcash_app/data/repositories/category_repository.dart';
+import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 
 void main() {
@@ -46,5 +49,65 @@ void main() {
       find.text('O formulário será implementado no próximo bloco.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('toggles dashboard amount visibility', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Ocultar valores'));
+    await tester.pump();
+
+    expect(find.byTooltip('Mostrar valores'), findsOneWidget);
+    expect(find.text('••••'), findsWidgets);
+  });
+
+  testWidgets('changes dashboard month from selector', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+    await tester.pumpAndSettle();
+
+    final year = DateTime.now().year;
+    await tester.tap(find.text('Janeiro/$year'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Janeiro/$year'), findsOneWidget);
+  });
+
+  testWidgets('opens transactions tab from dashboard category action', (
+    tester,
+  ) async {
+    final accountRepository = AccountRepository(database);
+    final categoryRepository = CategoryRepository(database);
+    final transactionRepository = TransactionRepository(database);
+    final account = await accountRepository.createAccount(
+      name: 'Carteira',
+      type: 'wallet',
+    );
+    final category = await categoryRepository.createCategory(
+      name: 'Mercado',
+      type: 'expense',
+    );
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 1000,
+      description: 'Compra',
+      date: DateTime.now(),
+      sourceAccountId: account.id,
+      categoryId: category.id,
+    );
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+    await tester.drag(find.byType(ListView), const Offset(0, -700));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Ver todas'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Transações'), findsWidgets);
+    expect(find.text('Nenhuma transação cadastrada'), findsOneWidget);
   });
 }

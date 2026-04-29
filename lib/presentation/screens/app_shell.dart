@@ -17,6 +17,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
+  DateTime _selectedDashboardMonth = DateTime.now();
 
   static const _screens = <_ShellScreen>[
     _ShellScreen(
@@ -88,13 +89,22 @@ class _AppShellState extends State<AppShell> {
       0 => FutureBuilder(
         future: DashboardService(
           AppDependencies.databaseOf(context),
-        ).getSummary(),
+        ).getSummary(month: _selectedDashboardMonth),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return DashboardScreen(summary: snapshot.data!);
+          return DashboardScreen(
+            summary: snapshot.data!,
+            selectedMonth: _selectedDashboardMonth,
+            onMonthChanged: (month) {
+              setState(() => _selectedDashboardMonth = month);
+            },
+            onShowAllTransactions: () {
+              setState(() => _currentIndex = 1);
+            },
+          );
         },
       ),
       1 => const TransactionsScreen(),
