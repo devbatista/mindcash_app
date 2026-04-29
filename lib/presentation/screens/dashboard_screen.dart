@@ -1,44 +1,50 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:mindcash_app/core/utils/money_formatter.dart';
+import 'package:mindcash_app/domain/models/dashboard_summary.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({required this.summary, super.key});
+
+  final DashboardSummary summary;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 120),
-      children: const [
-        _GreetingHeader(),
-        SizedBox(height: 28),
-        Text(
-          'Visao geral',
+      children: [
+        _GreetingHeader(userName: summary.userName),
+        const SizedBox(height: 28),
+        const Text(
+          'Visão geral',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Color(0xFF111827),
           ),
         ),
-        SizedBox(height: 14),
-        _BalanceCard(),
-        SizedBox(height: 26),
-        _MonthSummary(),
-        SizedBox(height: 30),
-        _CategorySection(),
+        const SizedBox(height: 14),
+        _BalanceCard(summary: summary),
+        const SizedBox(height: 26),
+        _MonthSummary(summary: summary),
+        const SizedBox(height: 30),
+        _CategorySection(items: summary.categoryExpenses),
       ],
     );
   }
 }
 
 class _GreetingHeader extends StatelessWidget {
-  const _GreetingHeader();
+  const _GreetingHeader({required this.userName});
+
+  final String userName;
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Ola, DevBatista',
-      style: TextStyle(
+    return Text(
+      'Olá, $userName',
+      style: const TextStyle(
         fontSize: 28,
         height: 1.2,
         fontWeight: FontWeight.w900,
@@ -49,7 +55,9 @@ class _GreetingHeader extends StatelessWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard();
+  const _BalanceCard({required this.summary});
+
+  final DashboardSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -66,10 +74,10 @@ class _BalanceCard extends StatelessWidget {
           ),
         ],
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Expanded(
                 child: Text(
@@ -84,29 +92,29 @@ class _BalanceCard extends StatelessWidget {
               Icon(Icons.visibility_outlined, color: Colors.white, size: 24),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            'R\$ 25.430,80',
-            style: TextStyle(
+            MoneyFormatter.brl(summary.totalBalanceCents),
+            style: const TextStyle(
               fontSize: 34,
               height: 1.1,
               fontWeight: FontWeight.w900,
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Row(
             children: [
               Expanded(
                 child: _BalanceBreakdown(
                   label: 'Contas',
-                  value: 'R\$ 18.230,50',
+                  value: MoneyFormatter.brl(summary.accountsBalanceCents),
                 ),
               ),
               Expanded(
                 child: _BalanceBreakdown(
-                  label: 'Cartoes',
-                  value: '-R\$ 7.200,30',
+                  label: 'Cartões',
+                  value: MoneyFormatter.brl(summary.cardsBalanceCents),
                 ),
               ),
             ],
@@ -151,7 +159,9 @@ class _BalanceBreakdown extends StatelessWidget {
 }
 
 class _MonthSummary extends StatelessWidget {
-  const _MonthSummary();
+  const _MonthSummary({required this.summary});
+
+  final DashboardSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +172,7 @@ class _MonthSummary extends StatelessWidget {
           children: [
             const Expanded(
               child: Text(
-                'Resumo do mes',
+                'Resumo do mês',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -177,19 +187,19 @@ class _MonthSummary extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFFE5E7EB)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Maio/2024',
-                    style: TextStyle(
+                    summary.monthLabel,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF111827),
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(Icons.keyboard_arrow_down, size: 20),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.keyboard_arrow_down, size: 20),
                 ],
               ),
             ),
@@ -209,24 +219,24 @@ class _MonthSummary extends StatelessWidget {
               ),
             ],
           ),
-          child: const Column(
+          child: Column(
             children: [
               _SummaryRow(
                 label: 'Receitas',
-                value: 'R\$ 15.600,00',
-                valueColor: Color(0xFF43A047),
+                value: MoneyFormatter.brl(summary.monthlyIncomeCents),
+                valueColor: const Color(0xFF43A047),
               ),
-              _Divider(),
+              const _Divider(),
               _SummaryRow(
                 label: 'Despesas',
-                value: '-R\$ 9.850,20',
-                valueColor: Color(0xFFE05252),
+                value: MoneyFormatter.brl(summary.monthlyExpenseCents),
+                valueColor: const Color(0xFFE05252),
               ),
-              _Divider(),
+              const _Divider(),
               _SummaryRow(
                 label: 'Resultado',
-                value: 'R\$ 5.749,80',
-                valueColor: Color(0xFF43A047),
+                value: MoneyFormatter.brl(summary.monthlyResultCents),
+                valueColor: const Color(0xFF43A047),
               ),
             ],
           ),
@@ -287,15 +297,9 @@ class _Divider extends StatelessWidget {
 }
 
 class _CategorySection extends StatelessWidget {
-  const _CategorySection();
+  const _CategorySection({required this.items});
 
-  static const _items = [
-    _CategoryItem('Mercado', '32%', 'R\$ 3.150,00', Color(0xFF3563D8)),
-    _CategoryItem('Alimentacao', '21%', 'R\$ 2.070,00', Color(0xFFF27A3D)),
-    _CategoryItem('Transporte', '15%', 'R\$ 1.400,00', Color(0xFF54BF57)),
-    _CategoryItem('Saude', '9%', 'R\$ 800,00', Color(0xFF5B45B8)),
-    _CategoryItem('Outros', '23%', 'R\$ 2.230,20', Color(0xFF9CA3AF)),
-  ];
+  final List<DashboardCategorySummary> items;
 
   @override
   Widget build(BuildContext context) {
@@ -328,16 +332,16 @@ class _CategorySection extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(
-              width: 154,
-              height: 154,
-              child: _CategoryDonut(items: _items),
+            SizedBox(
+              width: 132,
+              height: 132,
+              child: _CategoryDonut(items: items),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 children: [
-                  for (final item in _items) _CategoryLegendRow(item: item),
+                  for (final item in items) _CategoryLegendRow(item: item),
                 ],
               ),
             ),
@@ -351,7 +355,7 @@ class _CategorySection extends StatelessWidget {
 class _CategoryLegendRow extends StatelessWidget {
   const _CategoryLegendRow({required this.item});
 
-  final _CategoryItem item;
+  final DashboardCategorySummary item;
 
   @override
   Widget build(BuildContext context) {
@@ -363,7 +367,7 @@ class _CategoryLegendRow extends StatelessWidget {
             width: 13,
             height: 13,
             decoration: BoxDecoration(
-              color: item.color,
+              color: Color(item.colorValue),
               shape: BoxShape.circle,
             ),
           ),
@@ -383,7 +387,7 @@ class _CategoryLegendRow extends StatelessWidget {
           SizedBox(
             width: 34,
             child: Text(
-              item.percent,
+              '${item.percent}%',
               textAlign: TextAlign.right,
               style: const TextStyle(
                 fontSize: 13,
@@ -394,7 +398,7 @@ class _CategoryLegendRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            item.amount,
+            MoneyFormatter.brl(item.amountCents),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -410,7 +414,7 @@ class _CategoryLegendRow extends StatelessWidget {
 class _CategoryDonut extends StatelessWidget {
   const _CategoryDonut({required this.items});
 
-  final List<_CategoryItem> items;
+  final List<DashboardCategorySummary> items;
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +425,7 @@ class _CategoryDonut extends StatelessWidget {
 class _CategoryDonutPainter extends CustomPainter {
   const _CategoryDonutPainter(this.items);
 
-  final List<_CategoryItem> items;
+  final List<DashboardCategorySummary> items;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -436,7 +440,7 @@ class _CategoryDonutPainter extends CustomPainter {
 
     for (final item in items) {
       final sweep = item.fraction * math.pi * 2;
-      paint.color = item.color;
+      paint.color = Color(item.colorValue);
       canvas.drawArc(rect.deflate(strokeWidth / 2), start, sweep, false, paint);
       start += sweep;
     }
@@ -445,18 +449,5 @@ class _CategoryDonutPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _CategoryDonutPainter oldDelegate) {
     return oldDelegate.items != items;
-  }
-}
-
-class _CategoryItem {
-  const _CategoryItem(this.name, this.percent, this.amount, this.color);
-
-  final String name;
-  final String percent;
-  final String amount;
-  final Color color;
-
-  double get fraction {
-    return int.parse(percent.replaceAll('%', '')) / 100;
   }
 }
