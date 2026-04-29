@@ -107,7 +107,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 5. Repositories e regras do MVP
 
-- [ ] Criar `AccountRepository`
+- [x] Criar `AccountRepository`
 - [ ] Criar `CategoryRepository`
 - [ ] Criar `TransactionRepository`
 - [ ] Criar categorias iniciais
