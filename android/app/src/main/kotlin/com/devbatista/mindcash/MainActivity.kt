@@ -1,4 +1,4 @@
-package com.example.mindcash_app
+package com.devbatista.mindcash
 
 import io.flutter.embedding.android.FlutterActivity
 

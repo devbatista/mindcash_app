@@ -17,12 +17,12 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 - [x] Criar projeto Flutter
 - [x] Definir nome final do app: MindCash
-- [ ] Configurar package name: `com.devbatista.mindcash`
+- [x] Configurar package name: `com.devbatista.mindcash`
 - [ ] Rodar app base no Android
 - [ ] Rodar app base no iOS
-- [ ] Remover template padrao do contador
-- [ ] Configurar titulo do app
-- [ ] Definir tema base com Material 3
+- [x] Remover template padrao do contador
+- [x] Configurar titulo do app
+- [x] Definir tema base com Material 3
 - [ ] Configurar icone do app
 - [ ] Configurar splash screen
 
@@ -30,21 +30,21 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 2. Estrutura do projeto
 
-- [ ] Criar estrutura base:
-  - [ ] `lib/core`
-  - [ ] `lib/data`
-  - [ ] `lib/domain`
-  - [ ] `lib/presentation`
+- [x] Criar estrutura base:
+  - [x] `lib/core`
+  - [x] `lib/data`
+  - [x] `lib/domain`
+  - [x] `lib/presentation`
 
-- [ ] Organizar responsabilidades:
-  - [ ] `core/theme`
-  - [ ] `core/utils`
-  - [ ] `data/database`
-  - [ ] `data/repositories`
-  - [ ] `domain/models`
-  - [ ] `domain/services`
-  - [ ] `presentation/screens`
-  - [ ] `presentation/widgets`
+- [x] Organizar responsabilidades:
+  - [x] `core/theme`
+  - [x] `core/utils`
+  - [x] `data/database`
+  - [x] `data/repositories`
+  - [x] `domain/models`
+  - [x] `domain/services`
+  - [x] `presentation/screens`
+  - [x] `presentation/widgets`
 
 ---
 
@@ -137,7 +137,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
   - [ ] Alerta/erro
 - [ ] Definir tipografia base
 - [ ] Definir espacamentos padrao
-- [ ] Criar tema claro
+- [x] Criar tema claro
 - [ ] Criar componentes reutilizaveis:
   - [ ] Botao primario
   - [ ] Campo de texto
@@ -151,7 +151,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 7. Navegacao
 
-- [ ] Criar bottom navigation
+- [x] Criar bottom navigation
 - [ ] Criar rotas principais:
   - [ ] Dashboard
   - [ ] Transacoes
