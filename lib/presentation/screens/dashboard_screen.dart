@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:mindcash_app/core/utils/money_formatter.dart';
 import 'package:mindcash_app/domain/models/dashboard_summary.dart';
+import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/transaction_list_item.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({required this.summary, super.key});
@@ -29,7 +31,11 @@ class DashboardScreen extends StatelessWidget {
         const SizedBox(height: 26),
         _MonthSummary(summary: summary),
         const SizedBox(height: 30),
+        _AccountsSection(accounts: summary.accountCards),
+        const SizedBox(height: 30),
         _CategorySection(items: summary.categoryExpenses),
+        const SizedBox(height: 30),
+        _RecentTransactionsSection(transactions: summary.recentTransactions),
       ],
     );
   }
@@ -303,6 +309,14 @@ class _CategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const _CompactEmptySection(
+        title: 'Gastos por categoria',
+        icon: Icons.donut_large,
+        message: 'As despesas categorizadas aparecerão aqui.',
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -346,6 +360,186 @@ class _CategorySection extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _AccountsSection extends StatelessWidget {
+  const _AccountsSection({required this.accounts});
+
+  final List<DashboardAccountSummary> accounts;
+
+  @override
+  Widget build(BuildContext context) {
+    if (accounts.isEmpty) {
+      return const _CompactEmptySection(
+        title: 'Contas',
+        icon: Icons.account_balance_wallet,
+        message: 'Cadastre uma conta para acompanhar saldos.',
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Contas',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF111827),
+          ),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 104,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final account = accounts[index];
+
+              return _AccountCard(account: account);
+            },
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemCount: accounts.length,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({required this.account});
+
+  final DashboardAccountSummary account;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 180,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            account.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF111827),
+            ),
+          ),
+          Text(
+            MoneyFormatter.brl(account.balanceCents),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF6D3FD9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecentTransactionsSection extends StatelessWidget {
+  const _RecentTransactionsSection({required this.transactions});
+
+  final List<DashboardTransactionSummary> transactions;
+
+  @override
+  Widget build(BuildContext context) {
+    if (transactions.isEmpty) {
+      return const _CompactEmptySection(
+        title: 'Últimas transações',
+        icon: Icons.receipt_long,
+        message: 'As transações recentes aparecerão aqui.',
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Últimas transações',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF111827),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              for (final transaction in transactions)
+                TransactionListItem(
+                  description: transaction.description,
+                  categoryName: transaction.categoryName,
+                  amountCents: transaction.amountCents,
+                  type: transaction.type,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactEmptySection extends StatelessWidget {
+  const _CompactEmptySection({
+    required this.title,
+    required this.icon,
+    required this.message,
+  });
+
+  final String title;
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF111827),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: EmptyState(
+            icon: icon,
+            title: 'Nada por enquanto',
+            message: message,
+          ),
         ),
       ],
     );

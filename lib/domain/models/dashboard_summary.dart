@@ -8,7 +8,9 @@ final class DashboardSummary {
     required this.monthlyIncomeCents,
     required this.monthlyExpenseCents,
     required this.monthlyResultCents,
+    required this.accountCards,
     required this.categoryExpenses,
+    required this.recentTransactions,
   });
 
   final String userName;
@@ -19,7 +21,25 @@ final class DashboardSummary {
   final int monthlyIncomeCents;
   final int monthlyExpenseCents;
   final int monthlyResultCents;
+  final List<DashboardAccountSummary> accountCards;
   final List<DashboardCategorySummary> categoryExpenses;
+  final List<DashboardTransactionSummary> recentTransactions;
+
+  bool get hasData {
+    return accountCards.isNotEmpty || recentTransactions.isNotEmpty;
+  }
+}
+
+final class DashboardAccountSummary {
+  const DashboardAccountSummary({
+    required this.name,
+    required this.type,
+    required this.balanceCents,
+  });
+
+  final String name;
+  final String type;
+  final int balanceCents;
 }
 
 final class DashboardCategorySummary {
@@ -36,4 +56,18 @@ final class DashboardCategorySummary {
   final int colorValue;
 
   double get fraction => percent / 100;
+}
+
+final class DashboardTransactionSummary {
+  const DashboardTransactionSummary({
+    required this.description,
+    required this.categoryName,
+    required this.amountCents,
+    required this.type,
+  });
+
+  final String description;
+  final String categoryName;
+  final int amountCents;
+  final String type;
 }

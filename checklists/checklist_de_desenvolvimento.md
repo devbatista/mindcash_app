@@ -152,7 +152,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 ## 7. Navegação
 
 - [x] Criar bottom navigation
-- [ ] Criar rotas principais:
+- [x] Criar rotas principais:
   - [x] Dashboard
   - [x] Transações
   - [x] Nova transação
@@ -169,9 +169,9 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 - [x] Exibir entradas do mês
 - [x] Exibir saídas do mês
 - [x] Exibir resultado do mês
-- [ ] Exibir cards de contas
-- [ ] Exibir últimas transações
-- [ ] Exibir empty state quando não houver dados
+- [x] Exibir cards de contas
+- [x] Exibir últimas transações
+- [x] Exibir empty state quando não houver dados
 - [x] Exibir feedback visual para valores positivos/negativos
 - [x] Adicionar gráfico simples por categoria depois do MVP inicial
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindcash_app/domain/services/dashboard_service.dart';
+import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/screens/accounts_screen.dart';
 import 'package:mindcash_app/presentation/screens/cards_screen.dart';
 import 'package:mindcash_app/presentation/screens/dashboard_screen.dart';
@@ -15,8 +16,6 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  final DashboardService _dashboardService = const DashboardService();
-
   int _currentIndex = 0;
 
   static const _screens = <_ShellScreen>[
@@ -87,7 +86,9 @@ class _AppShellState extends State<AppShell> {
   Widget _buildBody() {
     return switch (_currentIndex) {
       0 => FutureBuilder(
-        future: _dashboardService.getSummary(),
+        future: DashboardService(
+          AppDependencies.databaseOf(context),
+        ).getSummary(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

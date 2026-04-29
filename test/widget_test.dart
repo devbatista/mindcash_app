@@ -20,7 +20,7 @@ void main() {
 
     expect(find.text('Olá, DevBatista'), findsOneWidget);
     expect(find.text('Saldo total'), findsOneWidget);
-    expect(find.text('R\$ 25.430,80'), findsOneWidget);
+    expect(find.text('R\$ 0,00'), findsWidgets);
     expect(find.byIcon(Icons.add), findsOneWidget);
   });
 
