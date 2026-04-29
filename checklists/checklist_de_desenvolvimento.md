@@ -82,13 +82,13 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ### Category
 
-- [ ] Criar tabela/model de categoria
-- [ ] Nome
-- [ ] Tipo: receita ou despesa
-- [ ] Cor/ícone simples
-- [ ] Categoria padrão do sistema
-- [ ] Ativa/inativa
-- [ ] Campos de sync
+- [x] Criar tabela/model de categoria
+- [x] Nome
+- [x] Tipo: receita ou despesa
+- [x] Cor/ícone simples
+- [x] Categoria padrão do sistema
+- [x] Ativa/inativa
+- [x] Campos de sync
 
 ### Transaction
 
