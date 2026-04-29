@@ -112,18 +112,18 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 - [x] Criar `TransactionRepository`
 - [x] Criar categorias iniciais
 - [x] Criar conta inicial opcional
-- [ ] Criar transação
-- [ ] Editar transação
-- [ ] Deletar transação
-- [ ] Listar transações por data
-- [ ] Filtrar por tipo
-- [ ] Buscar por descrição
-- [ ] Calcular saldo por conta
-- [ ] Calcular saldo total
-- [ ] Calcular entradas do mês
-- [ ] Calcular saídas do mês
-- [ ] Calcular resultado do mês
-- [ ] Implementar transferência entre contas
+- [x] Criar transação
+- [x] Editar transação
+- [x] Deletar transação
+- [x] Listar transações por data
+- [x] Filtrar por tipo
+- [x] Buscar por descrição
+- [x] Calcular saldo por conta
+- [x] Calcular saldo total
+- [x] Calcular entradas do mês
+- [x] Calcular saídas do mês
+- [x] Calcular resultado do mês
+- [x] Implementar transferência entre contas
 
 ---
 

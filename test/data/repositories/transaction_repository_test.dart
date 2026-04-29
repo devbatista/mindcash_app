@@ -74,4 +74,148 @@ void main() {
     expect(activeTransactions, isEmpty);
     expect(storedTransaction.deletedAt, isNotNull);
   });
+
+  test('filters transactions by date, type and description', () async {
+    final account = await accountRepository.createAccount(
+      name: 'Carteira',
+      type: 'wallet',
+    );
+
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 1200,
+      description: 'Café',
+      date: DateTime(2026, 4, 29, 9),
+      sourceAccountId: account.id,
+    );
+    await transactionRepository.createTransaction(
+      type: 'income',
+      amountCents: 10000,
+      description: 'Freelance',
+      date: DateTime(2026, 4, 30, 14),
+      sourceAccountId: account.id,
+    );
+
+    final byDate = await transactionRepository.listTransactionsByDate(
+      DateTime(2026, 4, 29),
+    );
+    final byType = await transactionRepository.listTransactions(type: 'income');
+    final byDescription = await transactionRepository.listTransactions(
+      search: 'café',
+    );
+
+    expect(byDate.map((transaction) => transaction.description), ['Café']);
+    expect(byType.map((transaction) => transaction.description), ['Freelance']);
+    expect(byDescription.map((transaction) => transaction.description), [
+      'Café',
+    ]);
+  });
+
+  test('calculates account balance and total balance', () async {
+    final wallet = await accountRepository.createAccount(
+      name: 'Carteira',
+      type: 'wallet',
+      initialBalanceCents: 5000,
+    );
+    final checking = await accountRepository.createAccount(
+      name: 'Conta corrente',
+      type: 'checking',
+      initialBalanceCents: 10000,
+    );
+
+    await transactionRepository.createTransaction(
+      type: 'income',
+      amountCents: 20000,
+      description: 'Salário',
+      date: DateTime(2026, 4, 1),
+      sourceAccountId: checking.id,
+    );
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 3500,
+      description: 'Mercado',
+      date: DateTime(2026, 4, 2),
+      sourceAccountId: checking.id,
+    );
+    await transactionRepository.createTransfer(
+      amountCents: 2500,
+      description: 'Saque',
+      date: DateTime(2026, 4, 3),
+      sourceAccountId: checking.id,
+      destinationAccountId: wallet.id,
+    );
+
+    final walletBalance = await transactionRepository.calculateAccountBalance(
+      wallet.id,
+    );
+    final checkingBalance = await transactionRepository.calculateAccountBalance(
+      checking.id,
+    );
+    final totalBalance = await transactionRepository.calculateTotalBalance();
+
+    expect(walletBalance, 7500);
+    expect(checkingBalance, 24000);
+    expect(totalBalance, 31500);
+  });
+
+  test('calculates monthly income, expense and result', () async {
+    final account = await accountRepository.createAccount(
+      name: 'Conta corrente',
+      type: 'checking',
+    );
+
+    await transactionRepository.createTransaction(
+      type: 'income',
+      amountCents: 100000,
+      description: 'Salário',
+      date: DateTime(2026, 4, 5),
+      sourceAccountId: account.id,
+    );
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 25000,
+      description: 'Aluguel',
+      date: DateTime(2026, 4, 6),
+      sourceAccountId: account.id,
+    );
+    await transactionRepository.createTransaction(
+      type: 'expense',
+      amountCents: 10000,
+      description: 'Mercado',
+      date: DateTime(2026, 5, 1),
+      sourceAccountId: account.id,
+    );
+
+    final income = await transactionRepository.calculateMonthlyIncome(
+      DateTime(2026, 4),
+    );
+    final expense = await transactionRepository.calculateMonthlyExpense(
+      DateTime(2026, 4),
+    );
+    final result = await transactionRepository.calculateMonthlyResult(
+      DateTime(2026, 4),
+    );
+
+    expect(income, 100000);
+    expect(expense, 25000);
+    expect(result, 75000);
+  });
+
+  test('requires destination account for transfers', () async {
+    final account = await accountRepository.createAccount(
+      name: 'Conta corrente',
+      type: 'checking',
+    );
+
+    expect(
+      () => transactionRepository.createTransaction(
+        type: 'transfer',
+        amountCents: 1000,
+        description: 'Transferência',
+        date: DateTime(2026, 4, 29),
+        sourceAccountId: account.id,
+      ),
+      throwsArgumentError,
+    );
+  });
 }
