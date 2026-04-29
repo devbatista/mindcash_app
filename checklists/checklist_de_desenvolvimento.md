@@ -61,11 +61,11 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ### Campos padrão para sync futura
 
-- [ ] `uuid`
-- [ ] `created_at`
-- [ ] `updated_at`
-- [ ] `deleted_at` opcional para soft delete
-- [ ] `sync_status` opcional
+- [x] `uuid`
+- [x] `created_at`
+- [x] `updated_at`
+- [x] `deleted_at` opcional para soft delete
+- [x] `sync_status` opcional
 
 ---
 
@@ -73,12 +73,12 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ### Account
 
-- [ ] Criar tabela/model de conta
-- [ ] Nome
-- [ ] Tipo: corrente, carteira, poupança, investimento, PJ, outro
-- [ ] Saldo inicial
-- [ ] Ativa/inativa
-- [ ] Campos de sync
+- [x] Criar tabela/model de conta
+- [x] Nome
+- [x] Tipo: corrente, carteira, poupança, investimento, PJ, outro
+- [x] Saldo inicial
+- [x] Ativa/inativa
+- [x] Campos de sync
 
 ### Category
 
