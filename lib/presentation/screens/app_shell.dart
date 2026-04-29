@@ -115,9 +115,15 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _openNewTransaction() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const NewTransactionScreen()),
-    );
+    Navigator.of(context)
+        .push<bool>(
+          MaterialPageRoute<bool>(builder: (_) => const NewTransactionScreen()),
+        )
+        .then((saved) {
+          if (saved ?? false) {
+            setState(() {});
+          }
+        });
   }
 }
 

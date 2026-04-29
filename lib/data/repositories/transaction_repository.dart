@@ -36,7 +36,7 @@ class TransactionRepository {
             sourceAccountId: sourceAccountId,
             destinationAccountId: Value.absentIfNull(destinationAccountId),
             categoryId: Value.absentIfNull(categoryId),
-            note: Value.absentIfNull(note?.trim()),
+            note: Value.absentIfNull(_nullIfBlank(note)),
             createdAt: now,
             updatedAt: now,
           ),
@@ -114,7 +114,7 @@ class TransactionRepository {
       transaction
           .copyWith(
             description: transaction.description.trim(),
-            note: Value(transaction.note?.trim()),
+            note: Value(_nullIfBlank(transaction.note)),
             updatedAt: DateTime.now(),
           )
           .toCompanion(false),
@@ -268,5 +268,15 @@ class TransactionRepository {
 
   String _createUuid(DateTime now) {
     return 'transaction-${now.microsecondsSinceEpoch}';
+  }
+
+  String? _nullIfBlank(String? value) {
+    final trimmed = value?.trim();
+
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+
+    return trimmed;
   }
 }

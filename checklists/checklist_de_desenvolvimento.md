@@ -193,17 +193,17 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 10. Tela: Nova transação
 
-- [ ] Selecionar tipo: despesa, receita ou transferência
-- [ ] Informar valor
-- [ ] Informar descrição
-- [ ] Selecionar categoria
-- [ ] Selecionar conta
-- [ ] Selecionar conta de destino em transferência
-- [ ] Selecionar data
-- [ ] Adicionar observação opcional
-- [ ] Validar campos obrigatórios
-- [ ] Salvar e voltar para lista/dashboard
-- [ ] Exibir feedback de sucesso/erro
+- [x] Selecionar tipo: despesa, receita ou transferência
+- [x] Informar valor
+- [x] Informar descrição
+- [x] Selecionar categoria
+- [x] Selecionar conta
+- [x] Selecionar conta de destino em transferência
+- [x] Selecionar data
+- [x] Adicionar observação opcional
+- [x] Validar campos obrigatórios
+- [x] Salvar e voltar para lista/dashboard
+- [x] Exibir feedback de sucesso/erro
 
 ---
 

@@ -38,6 +38,13 @@ void main() {
   });
 
   testWidgets('opens new transaction route from action button', (tester) async {
+    await AccountRepository(
+      database,
+    ).createAccount(name: 'Carteira', type: 'wallet');
+    await CategoryRepository(
+      database,
+    ).createCategory(name: 'Mercado', type: 'expense');
+
     await tester.pumpWidget(MindCashApp(database: database));
     await tester.pump();
 
@@ -45,10 +52,37 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nova transação'), findsWidgets);
-    expect(
-      find.text('O formulário será implementado no próximo bloco.'),
-      findsOneWidget,
-    );
+    expect(find.text('Valor'), findsOneWidget);
+    expect(find.text('Descrição'), findsOneWidget);
+  });
+
+  testWidgets('creates transaction from new transaction form', (tester) async {
+    await AccountRepository(
+      database,
+    ).createAccount(name: 'Carteira', type: 'wallet');
+    await CategoryRepository(
+      database,
+    ).createCategory(name: 'Mercado', type: 'expense');
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), '12345');
+    await tester.enterText(find.byType(TextFormField).at(1), 'Compra do mês');
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+
+    final transactions = await TransactionRepository(
+      database,
+    ).listActiveTransactions();
+
+    expect(transactions, hasLength(1));
+    expect(transactions.single.description, 'Compra do mês');
+    expect(transactions.single.amountCents, 12345);
+    expect(find.text('Saldo total'), findsOneWidget);
   });
 
   testWidgets('toggles dashboard amount visibility', (tester) async {
