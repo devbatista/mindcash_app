@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mindcash_app/presentation/screens/dashboard_screen.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
 
 class AppShell extends StatefulWidget {
@@ -13,12 +14,9 @@ class _AppShellState extends State<AppShell> {
 
   static const _screens = <_ShellScreen>[
     _ShellScreen(
-      title: 'Dashboard',
+      title: 'Inicio',
       icon: Icons.dashboard_outlined,
       selectedIcon: Icons.dashboard,
-      emptyTitle: 'Seu resumo financeiro vai aparecer aqui',
-      emptyMessage:
-          'Cadastre contas e transacoes para acompanhar saldo, entradas e saidas.',
     ),
     _ShellScreen(
       title: 'Transacoes',
@@ -29,20 +27,11 @@ class _AppShellState extends State<AppShell> {
           'Use o botao de adicionar para registrar receitas, despesas e transferencias.',
     ),
     _ShellScreen(
-      title: 'Contas',
-      icon: Icons.account_balance_wallet_outlined,
-      selectedIcon: Icons.account_balance_wallet,
-      emptyTitle: 'Nenhuma conta cadastrada',
-      emptyMessage:
-          'Suas contas locais serao a base para calcular saldos offline.',
-    ),
-    _ShellScreen(
-      title: 'Cartoes',
-      icon: Icons.credit_card_outlined,
-      selectedIcon: Icons.credit_card,
-      emptyTitle: 'Cartoes entram depois do MVP',
-      emptyMessage:
-          'Primeiro vamos consolidar contas, categorias e transacoes.',
+      title: 'Planejamento',
+      icon: Icons.event_note_outlined,
+      selectedIcon: Icons.event_note,
+      emptyTitle: 'Planejamento entra depois do MVP',
+      emptyMessage: 'Aqui ficarao recorrencias, metas e previsoes mensais.',
     ),
     _ShellScreen(
       title: 'Mais',
@@ -57,25 +46,35 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final screen = _screens[_currentIndex];
+    final isDashboard = _currentIndex == 0;
 
     return Scaffold(
-      appBar: AppBar(title: Text(screen.title)),
+      appBar: isDashboard ? null : AppBar(title: Text(screen.title)),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: EmptyState(
-            icon: screen.selectedIcon,
-            title: screen.emptyTitle,
-            message: screen.emptyMessage,
-          ),
+        child: isDashboard
+            ? const DashboardScreen()
+            : Padding(
+                padding: const EdgeInsets.all(16),
+                child: EmptyState(
+                  icon: screen.selectedIcon,
+                  title: screen.emptyTitle,
+                  message: screen.emptyMessage,
+                ),
+              ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 64,
+        height: 64,
+        child: FloatingActionButton(
+          shape: const CircleBorder(),
+          onPressed: () {},
+          tooltip: 'Nova transacao',
+          child: const Icon(Icons.add, size: 32),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Nova transacao',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NavigationBar(
+        height: 82,
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
@@ -98,8 +97,8 @@ class _ShellScreen {
     required this.title,
     required this.icon,
     required this.selectedIcon,
-    required this.emptyTitle,
-    required this.emptyMessage,
+    this.emptyTitle = '',
+    this.emptyMessage = '',
   });
 
   final String title;

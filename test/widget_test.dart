@@ -6,11 +6,9 @@ void main() {
   testWidgets('shows the MindCash app shell', (tester) async {
     await tester.pumpWidget(const MindCashApp());
 
-    expect(find.text('Dashboard'), findsNWidgets(2));
-    expect(
-      find.text('Seu resumo financeiro vai aparecer aqui'),
-      findsOneWidget,
-    );
+    expect(find.text('Ola, DevBatista'), findsOneWidget);
+    expect(find.text('Saldo total'), findsOneWidget);
+    expect(find.text('R\$ 25.430,80'), findsOneWidget);
     expect(find.byIcon(Icons.add), findsOneWidget);
   });
 
