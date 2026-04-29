@@ -92,16 +92,16 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ### Transaction
 
-- [ ] Criar tabela/model de transação
-- [ ] Tipo: receita, despesa ou transferência
-- [ ] Valor
-- [ ] Descrição
-- [ ] Data
-- [ ] Conta de origem
-- [ ] Conta de destino para transferência
-- [ ] Categoria
-- [ ] Observação opcional
-- [ ] Campos de sync
+- [x] Criar tabela/model de transação
+- [x] Tipo: receita, despesa ou transferência
+- [x] Valor
+- [x] Descrição
+- [x] Data
+- [x] Conta de origem
+- [x] Conta de destino para transferência
+- [x] Categoria
+- [x] Observação opcional
+- [x] Campos de sync
 
 ---
 
