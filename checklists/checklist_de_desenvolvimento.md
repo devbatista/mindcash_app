@@ -111,7 +111,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 - [x] Criar `CategoryRepository`
 - [x] Criar `TransactionRepository`
 - [x] Criar categorias iniciais
-- [ ] Criar conta inicial opcional
+- [x] Criar conta inicial opcional
 - [ ] Criar transação
 - [ ] Editar transação
 - [ ] Deletar transação
