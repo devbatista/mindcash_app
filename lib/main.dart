@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
+import 'package:mindcash_app/data/repositories/recurrence_repository.dart';
 import 'package:mindcash_app/data/seeders/default_account_seeder.dart';
 import 'package:mindcash_app/data/seeders/default_category_seeder.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
@@ -11,6 +12,7 @@ Future<void> main() async {
 
   final database = AppDatabase.memory();
   await _seedDefaultData(database);
+  await RecurrenceRepository(database).executePendingRecurrences();
 
   runApp(MindCashApp(database: database));
 }

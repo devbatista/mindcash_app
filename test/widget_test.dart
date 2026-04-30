@@ -4,6 +4,7 @@ import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
 import 'package:mindcash_app/data/repositories/credit_card_repository.dart';
+import 'package:mindcash_app/data/repositories/recurrence_repository.dart';
 import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 
@@ -260,5 +261,39 @@ void main() {
     expect(cards.single.name, 'Nubank');
     expect(find.text('Nubank'), findsOneWidget);
     expect(find.text('Limite R\$ 5.000,00'), findsOneWidget);
+  });
+
+  testWidgets('creates recurrence from more screen', (tester) async {
+    await AccountRepository(
+      database,
+    ).createAccount(name: 'Carteira', type: 'wallet');
+    await CategoryRepository(
+      database,
+    ).createCategory(name: 'Assinaturas', type: 'expense');
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Mais').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Criar recorrência'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), '3990');
+    await tester.enterText(find.byType(TextFormField).at(1), 'Streaming');
+    await tester.enterText(find.byType(TextFormField).at(2), '15');
+    await tester.ensureVisible(find.text('Salvar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+
+    final recurrences = await RecurrenceRepository(
+      database,
+    ).listActiveRecurrences();
+
+    expect(recurrences, hasLength(1));
+    expect(recurrences.single.description, 'Streaming');
+    expect(find.text('Streaming'), findsOneWidget);
   });
 }

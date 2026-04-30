@@ -248,12 +248,12 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 14. Recorrências
 
-- [ ] Criar tabela/model de recorrência
-- [ ] Criar recorrência mensal
-- [ ] Executar recorrências pendentes ao abrir app
-- [ ] Evitar duplicidade de lançamentos
-- [ ] Ativar/desativar recorrência
-- [ ] Editar recorrência
+- [x] Criar tabela/model de recorrência
+- [x] Criar recorrência mensal
+- [x] Executar recorrências pendentes ao abrir app
+- [x] Evitar duplicidade de lançamentos
+- [x] Ativar/desativar recorrência
+- [x] Editar recorrência
 
 ---
 
