@@ -209,13 +209,13 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 11. Tela: Contas
 
-- [ ] Listar contas
-- [ ] Exibir saldo atual por conta
-- [ ] Criar conta
-- [ ] Editar conta
-- [ ] Inativar conta
-- [ ] Definir tipo da conta
-- [ ] Validar se conta com transações pode ser removida
+- [x] Listar contas
+- [x] Exibir saldo atual por conta
+- [x] Criar conta
+- [x] Editar conta
+- [x] Inativar conta
+- [x] Definir tipo da conta
+- [x] Validar se conta com transações pode ser removida
 
 ---
 

@@ -68,6 +68,34 @@ class AccountRepository {
     );
   }
 
+  Future<bool> hasTransactions(int id) async {
+    final sourceTransactions =
+        await (_database.select(_database.transactions)
+              ..where(
+                (transaction) =>
+                    transaction.sourceAccountId.equals(id) &
+                    transaction.deletedAt.isNull(),
+              )
+              ..limit(1))
+            .get();
+
+    if (sourceTransactions.isNotEmpty) {
+      return true;
+    }
+
+    final destinationTransactions =
+        await (_database.select(_database.transactions)
+              ..where(
+                (transaction) =>
+                    transaction.destinationAccountId.equals(id) &
+                    transaction.deletedAt.isNull(),
+              )
+              ..limit(1))
+            .get();
+
+    return destinationTransactions.isNotEmpty;
+  }
+
   String _createUuid(DateTime now) {
     return 'account-${now.microsecondsSinceEpoch}';
   }

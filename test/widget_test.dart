@@ -187,4 +187,52 @@ void main() {
 
     expect(find.text('Mercado'), findsOneWidget);
   });
+
+  testWidgets('creates account from accounts screen', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Contas').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Criar conta'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'Banco');
+    await tester.enterText(find.byType(TextFormField).at(1), '15000');
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Banco'), findsOneWidget);
+    expect(find.text('R\$ 150,00'), findsOneWidget);
+  });
+
+  testWidgets('does not deactivate account with transactions', (tester) async {
+    final account = await AccountRepository(
+      database,
+    ).createAccount(name: 'Carteira', type: 'wallet');
+    await TransactionRepository(database).createTransaction(
+      type: 'income',
+      amountCents: 1000,
+      description: 'Entrada',
+      date: DateTime.now(),
+      sourceAccountId: account.id,
+    );
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Contas').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Inativar'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Conta com transações não pode ser inativada.'),
+      findsOneWidget,
+    );
+  });
 }
