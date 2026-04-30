@@ -2,9 +2,13 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:mindcash_app/core/utils/money_formatter.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
+import 'package:mindcash_app/data/repositories/account_repository.dart';
+import 'package:mindcash_app/data/repositories/category_repository.dart';
 import 'package:mindcash_app/data/repositories/credit_card_repository.dart';
+import 'package:mindcash_app/data/repositories/installment_repository.dart';
 import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
+import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
@@ -40,10 +44,21 @@ class _CardsScreenState extends State<CardsScreen> {
               title: 'Nenhum cartão cadastrado',
               message:
                   'Cadastre seus cartões para acompanhar limite, fechamento, vencimento e fatura atual.',
-              action: FilledButton.icon(
-                onPressed: () => _openCreditCardForm(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Criar cartão'),
+              action: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () => _openCreditCardForm(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Criar cartão'),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _openInstallmentForm(context),
+                    icon: const Icon(Icons.splitscreen),
+                    label: const Text('Compra parcelada'),
+                  ),
+                ],
               ),
             ),
           );
@@ -52,13 +67,22 @@ class _CardsScreenState extends State<CardsScreen> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton.icon(
-                onPressed: () => _openCreditCardForm(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Criar cartão'),
-              ),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _openInstallmentForm(context),
+                  icon: const Icon(Icons.splitscreen),
+                  label: const Text('Compra parcelada'),
+                ),
+                FilledButton.icon(
+                  onPressed: () => _openCreditCardForm(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Criar cartão'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             for (final card in cards)
@@ -137,6 +161,19 @@ class _CardsScreenState extends State<CardsScreen> {
       if (mounted) {
         setState(() {});
       }
+    }
+  }
+
+  Future<void> _openInstallmentForm(BuildContext context) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => const _InstallmentPurchaseFormSheet(),
+    );
+
+    if (saved ?? false) {
+      setState(() {});
     }
   }
 }
@@ -446,6 +483,315 @@ class _CreditCardFormSheetState extends State<_CreditCardFormSheet> {
   }
 }
 
+class _InstallmentPurchaseFormSheet extends StatefulWidget {
+  const _InstallmentPurchaseFormSheet();
+
+  @override
+  State<_InstallmentPurchaseFormSheet> createState() =>
+      _InstallmentPurchaseFormSheetState();
+}
+
+class _InstallmentPurchaseFormSheetState
+    extends State<_InstallmentPurchaseFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _descriptionController = TextEditingController();
+  final _totalController = TextEditingController();
+  final _countController = TextEditingController(text: '2');
+  Future<_InstallmentFormData>? _formData;
+  DateTime _purchaseDate = DateTime.now();
+  String _target = 'creditCard';
+  int? _accountId;
+  int? _creditCardId;
+  int? _categoryId;
+  var _isSaving = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _formData ??= _loadFormData();
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _totalController.dispose();
+    _countController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_InstallmentFormData>(
+      future: _formData,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final data = snapshot.data!;
+        _ensureDefaults(data);
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Compra parcelada',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 16),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'creditCard',
+                        label: Text('Cartão'),
+                        icon: Icon(Icons.credit_card),
+                      ),
+                      ButtonSegment(
+                        value: 'account',
+                        label: Text('Conta'),
+                        icon: Icon(Icons.account_balance_wallet),
+                      ),
+                    ],
+                    selected: {_target},
+                    onSelectionChanged: (value) {
+                      setState(() => _target = value.single);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    label: 'Descrição',
+                    controller: _descriptionController,
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Informe uma descrição.';
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  MoneyField(
+                    controller: _totalController,
+                    label: 'Valor total',
+                  ),
+                  const SizedBox(height: 12),
+                  AppTextField(
+                    label: 'Quantidade de parcelas',
+                    controller: _countController,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    validator: (value) {
+                      final count = int.tryParse(value?.trim() ?? '');
+
+                      if (count == null || count < 2) {
+                        return 'Informe pelo menos duas parcelas.';
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  if (_target == 'creditCard') ...[
+                    DropdownButtonFormField<int>(
+                      initialValue: _creditCardId,
+                      decoration: const InputDecoration(
+                        labelText: 'Cartão',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: data.creditCards
+                          .map(
+                            (card) => DropdownMenuItem(
+                              value: card.id,
+                              child: Text(card.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => _creditCardId = value);
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Selecione um cartão.';
+                        }
+
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ] else ...[
+                    DropdownButtonFormField<int>(
+                      initialValue: _accountId,
+                      decoration: const InputDecoration(
+                        labelText: 'Conta',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: data.accounts
+                          .map(
+                            (account) => DropdownMenuItem(
+                              value: account.id,
+                              child: Text(account.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => _accountId = value);
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Selecione uma conta.';
+                        }
+
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (data.expenseCategories.isNotEmpty) ...[
+                    DropdownButtonFormField<int>(
+                      initialValue: _categoryId,
+                      decoration: const InputDecoration(
+                        labelText: 'Categoria',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: data.expenseCategories
+                          .map(
+                            (category) => DropdownMenuItem(
+                              value: category.id,
+                              child: Text(category.name),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => _categoryId = value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  DatePickerField(
+                    label: 'Data da compra',
+                    value: _purchaseDate,
+                    onChanged: (value) {
+                      setState(() => _purchaseDate = value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  PrimaryButton(
+                    label: _isSaving ? 'Salvando...' : 'Salvar parcelas',
+                    icon: Icons.check,
+                    onPressed: _isSaving ? null : _save,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<_InstallmentFormData> _loadFormData() async {
+    final database = AppDependencies.databaseOf(context);
+    final accounts = await AccountRepository(database).listActiveAccounts();
+    final creditCards = await CreditCardRepository(
+      database,
+    ).listActiveCreditCards();
+    final categories = await CategoryRepository(
+      database,
+    ).listActiveCategories(type: 'expense');
+
+    return _InstallmentFormData(
+      accounts: accounts,
+      creditCards: creditCards,
+      expenseCategories: categories,
+    );
+  }
+
+  void _ensureDefaults(_InstallmentFormData data) {
+    if (data.creditCards.isEmpty && data.accounts.isNotEmpty) {
+      _target = 'account';
+    }
+
+    _creditCardId ??= data.creditCards.isEmpty
+        ? null
+        : data.creditCards.first.id;
+    _accountId ??= data.accounts.isEmpty ? null : data.accounts.first.id;
+    _categoryId ??= data.expenseCategories.isEmpty
+        ? null
+        : data.expenseCategories.first.id;
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final totalCents = MoneyField.parseCents(_totalController.text);
+    if (totalCents <= 0) {
+      _showMessage('Informe um valor maior que zero.');
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      await InstallmentRepository(
+        AppDependencies.databaseOf(context),
+      ).createInstallmentPurchase(
+        description: _descriptionController.text,
+        totalCents: totalCents,
+        installmentCount: int.parse(_countController.text),
+        purchaseDate: _purchaseDate,
+        accountId: _target == 'account' ? _accountId : null,
+        creditCardId: _target == 'creditCard' ? _creditCardId : null,
+        categoryId: _categoryId,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compra parcelada salva.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        _showMessage('Não foi possível salvar a compra parcelada.');
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _InstallmentFormData {
+  const _InstallmentFormData({
+    required this.accounts,
+    required this.creditCards,
+    required this.expenseCategories,
+  });
+
+  final List<Account> accounts;
+  final List<CreditCard> creditCards;
+  final List<Category> expenseCategories;
+}
+
 class _InvoiceDetailsSheet extends StatefulWidget {
   const _InvoiceDetailsSheet({required this.creditCard});
 
@@ -508,7 +854,8 @@ class _InvoiceDetailsSheetState extends State<_InvoiceDetailsSheet> {
                   ),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: summary.launches.isEmpty
+                    child:
+                        summary.launches.isEmpty && summary.installments.isEmpty
                         ? const EmptyState(
                             icon: Icons.receipt_long,
                             title: 'Nenhum lançamento',
@@ -516,11 +863,60 @@ class _InvoiceDetailsSheetState extends State<_InvoiceDetailsSheet> {
                                 'As despesas no período da fatura aparecerão aqui.',
                           )
                         : ListView.separated(
-                            itemCount: summary.launches.length,
+                            itemCount:
+                                summary.installments.length +
+                                summary.launches.length,
                             separatorBuilder: (context, index) =>
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
-                              final launch = summary.launches[index];
+                              if (index < summary.installments.length) {
+                                final installment = summary.installments[index];
+
+                                return ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(installment.description),
+                                  subtitle: Text(
+                                    'Parcela ${installment.installmentNumber}/${installment.installmentCount} • ${_formatDate(installment.dueDate)}',
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        MoneyFormatter.brl(
+                                          installment.amountCents,
+                                        ),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      PopupMenuButton<_InstallmentAction>(
+                                        onSelected: (action) {
+                                          switch (action) {
+                                            case _InstallmentAction
+                                                .cancelFuture:
+                                              _cancelFutureInstallments(
+                                                installment,
+                                              );
+                                          }
+                                        },
+                                        itemBuilder: (context) => const [
+                                          PopupMenuItem(
+                                            value:
+                                                _InstallmentAction.cancelFuture,
+                                            child: Text(
+                                              'Cancelar próximas parcelas',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              final launch =
+                                  summary.launches[index -
+                                      summary.installments.length];
 
                               return ListTile(
                                 contentPadding: EdgeInsets.zero,
@@ -569,6 +965,44 @@ class _InvoiceDetailsSheetState extends State<_InvoiceDetailsSheet> {
       );
     }
   }
+
+  Future<void> _cancelFutureInstallments(Installment installment) async {
+    final database = AppDependencies.databaseOf(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancelar parcelas futuras?'),
+        content: Text(
+          'As próximas parcelas de "${installment.description}" serão canceladas.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+
+    if (!(confirmed ?? false)) {
+      return;
+    }
+
+    await InstallmentRepository(
+      database,
+    ).cancelFutureInstallments(installment.purchaseUuid);
+
+    if (mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Parcelas futuras canceladas.')),
+      );
+    }
+  }
 }
 
 class _InvoiceSummaryHeader extends StatelessWidget {
@@ -600,6 +1034,8 @@ class _InvoiceSummaryHeader extends StatelessWidget {
             'Período: ${_formatDate(summary.startDate)} a ${_formatDate(summary.closingDate)}',
           ),
           Text('Vencimento: ${_formatDate(summary.dueDate)}'),
+          if (summary.installments.isNotEmpty)
+            Text('Parcela atual: ${_currentInstallmentLabel(summary)}'),
           Text(summary.isPaid ? 'Status: paga' : 'Status: aberta'),
         ],
       ),
@@ -608,6 +1044,14 @@ class _InvoiceSummaryHeader extends StatelessWidget {
 }
 
 enum _CreditCardAction { edit, deactivate }
+
+enum _InstallmentAction { cancelFuture }
+
+String _currentInstallmentLabel(CreditCardInvoiceSummary summary) {
+  final installment = summary.installments.first;
+
+  return '${installment.installmentNumber}/${installment.installmentCount}';
+}
 
 String _formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}/'

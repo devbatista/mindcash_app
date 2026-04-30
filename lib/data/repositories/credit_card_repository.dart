@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
+import 'package:mindcash_app/data/repositories/installment_repository.dart';
 import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 
 class CreditCardRepository {
@@ -90,13 +91,23 @@ class CreditCardRepository {
   }) async {
     final period = _buildInvoicePeriod(creditCard, month ?? DateTime.now());
     final launches = await listInvoiceLaunches(creditCard, month: month);
+    final installments = await InstallmentRepository(_database)
+        .listActiveInstallments(
+          creditCardId: creditCard.id,
+          startDate: period.startDate,
+          endDate: period.endDate,
+        );
     final storedInvoice = await _findInvoice(
       creditCard.id,
       period.referenceMonth,
     );
-    final totalCents = launches.fold<int>(
+    final transactionTotalCents = launches.fold<int>(
       0,
       (total, transaction) => total + transaction.amountCents,
+    );
+    final installmentTotalCents = installments.fold<int>(
+      0,
+      (total, installment) => total + installment.amountCents,
     );
 
     return CreditCardInvoiceSummary(
@@ -105,8 +116,9 @@ class CreditCardRepository {
       startDate: period.startDate,
       closingDate: period.closingDate,
       dueDate: period.dueDate,
-      totalCents: totalCents,
+      totalCents: transactionTotalCents + installmentTotalCents,
       launches: launches,
+      installments: installments,
       invoice: storedInvoice,
       isPaid: storedInvoice?.isPaid ?? false,
       paidAt: storedInvoice?.paidAt,
@@ -267,6 +279,7 @@ class CreditCardInvoiceSummary {
     required this.dueDate,
     required this.totalCents,
     required this.launches,
+    required this.installments,
     required this.isPaid,
     this.invoice,
     this.paidAt,
@@ -279,6 +292,7 @@ class CreditCardInvoiceSummary {
   final DateTime dueDate;
   final int totalCents;
   final List<Transaction> launches;
+  final List<Installment> installments;
   final Invoice? invoice;
   final bool isPaid;
   final DateTime? paidAt;

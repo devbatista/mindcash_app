@@ -237,12 +237,12 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 13. Parcelamento
 
-- [ ] Criar tabela/model de parcelas
-- [ ] Criar compra parcelada
-- [ ] Gerar parcelas automaticamente
-- [ ] Associar parcelas ao cartão ou conta
-- [ ] Exibir parcela atual
-- [ ] Permitir cancelar parcelas futuras
+- [x] Criar tabela/model de parcelas
+- [x] Criar compra parcelada
+- [x] Gerar parcelas automaticamente
+- [x] Associar parcelas ao cartão ou conta
+- [x] Exibir parcela atual
+- [x] Permitir cancelar parcelas futuras
 
 ---
 
