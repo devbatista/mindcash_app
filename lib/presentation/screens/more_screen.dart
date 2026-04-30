@@ -11,15 +11,40 @@ import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
+import 'package:mindcash_app/presentation/screens/reports_screen.dart';
 
-class MoreScreen extends StatefulWidget {
+class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
   @override
-  State<MoreScreen> createState() => _MoreScreenState();
+  Widget build(BuildContext context) {
+    return const DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            tabs: [
+              Tab(text: 'Recorrências'),
+              Tab(text: 'Relatórios'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(children: [_RecurrencesTab(), ReportsScreen()]),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _MoreScreenState extends State<MoreScreen> {
+class _RecurrencesTab extends StatefulWidget {
+  const _RecurrencesTab();
+
+  @override
+  State<_RecurrencesTab> createState() => _RecurrencesTabState();
+}
+
+class _RecurrencesTabState extends State<_RecurrencesTab> {
   @override
   Widget build(BuildContext context) {
     final repository = RecurrenceRepository(

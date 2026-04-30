@@ -259,12 +259,12 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 15. Relatórios
 
-- [ ] Gastos por categoria
-- [ ] Resumo mensal
-- [ ] Evolução do saldo
-- [ ] Comparativo entre meses
-- [ ] Filtro por conta
-- [ ] Filtro por categoria
+- [x] Gastos por categoria
+- [x] Resumo mensal
+- [x] Evolução do saldo
+- [x] Comparativo entre meses
+- [x] Filtro por conta
+- [x] Filtro por categoria
 
 ---
 

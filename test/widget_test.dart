@@ -296,4 +296,36 @@ void main() {
     expect(recurrences.single.description, 'Streaming');
     expect(find.text('Streaming'), findsOneWidget);
   });
+
+  testWidgets('shows reports tab with monthly summary', (tester) async {
+    final account = await AccountRepository(
+      database,
+    ).createAccount(name: 'Carteira', type: 'wallet');
+    final category = await CategoryRepository(
+      database,
+    ).createCategory(name: 'Mercado', type: 'expense');
+    await TransactionRepository(database).createTransaction(
+      type: 'expense',
+      amountCents: 2500,
+      description: 'Compra',
+      date: DateTime.now(),
+      sourceAccountId: account.id,
+      categoryId: category.id,
+    );
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Mais').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Relatórios'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Resumo mensal'), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gastos por categoria'), findsOneWidget);
+    expect(find.text('Mercado'), findsOneWidget);
+  });
 }
