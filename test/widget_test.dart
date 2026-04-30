@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
+import 'package:mindcash_app/data/repositories/credit_card_repository.dart';
 import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 
@@ -234,5 +235,30 @@ void main() {
       find.text('Conta com transações não pode ser inativada.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('creates credit card from cards screen', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Cartões').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Criar cartão'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'Nubank');
+    await tester.enterText(find.byType(TextFormField).at(1), '500000');
+    await tester.enterText(find.byType(TextFormField).at(2), '10');
+    await tester.enterText(find.byType(TextFormField).at(3), '17');
+    await tester.tap(find.text('Salvar'));
+    await tester.pumpAndSettle();
+
+    final cards = await CreditCardRepository(database).listActiveCreditCards();
+
+    expect(cards, hasLength(1));
+    expect(cards.single.name, 'Nubank');
+    expect(find.text('Nubank'), findsOneWidget);
+    expect(find.text('Limite R\$ 5.000,00'), findsOneWidget);
   });
 }

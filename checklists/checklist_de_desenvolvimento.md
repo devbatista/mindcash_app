@@ -221,17 +221,17 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 12. Cartão de crédito
 
-- [ ] Criar tabela/model de cartão
-- [ ] Criar tabela/model de fatura
-- [ ] Listar cartões
-- [ ] Criar cartão
-- [ ] Editar cartão
-- [ ] Definir limite
-- [ ] Definir dia de fechamento
-- [ ] Definir dia de vencimento
-- [ ] Calcular fatura atual
-- [ ] Listar lançamentos da fatura
-- [ ] Registrar pagamento de fatura
+- [x] Criar tabela/model de cartão
+- [x] Criar tabela/model de fatura
+- [x] Listar cartões
+- [x] Criar cartão
+- [x] Editar cartão
+- [x] Definir limite
+- [x] Definir dia de fechamento
+- [x] Definir dia de vencimento
+- [x] Calcular fatura atual
+- [x] Listar lançamentos da fatura
+- [x] Registrar pagamento de fatura
 
 ---
 

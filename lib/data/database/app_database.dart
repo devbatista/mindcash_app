@@ -3,11 +3,15 @@ import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:mindcash_app/data/database/tables/accounts_table.dart';
 import 'package:mindcash_app/data/database/tables/categories_table.dart';
+import 'package:mindcash_app/data/database/tables/credit_cards_table.dart';
+import 'package:mindcash_app/data/database/tables/invoices_table.dart';
 import 'package:mindcash_app/data/database/tables/transactions_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Accounts, Categories, Transactions])
+@DriftDatabase(
+  tables: [Accounts, Categories, Transactions, CreditCards, Invoices],
+)
 final class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
