@@ -59,7 +59,7 @@ void main() {
   test('exports and imports app settings', () async {
     await AppSettingsRepository(
       database,
-    ).updateSettings(userName: 'Rafael', currencyCode: 'BRL');
+    ).completeOnboarding(userName: 'Rafael', currencyCode: 'BRL');
     final backup = await service.exportJson();
 
     await service.resetAllData();
@@ -69,6 +69,7 @@ void main() {
 
     expect(settings.userName, 'Rafael');
     expect(settings.currencyCode, 'BRL');
+    expect(settings.hasCompletedOnboarding, isTrue);
   });
 
   test('imports JSON backup and creates safety backup first', () async {

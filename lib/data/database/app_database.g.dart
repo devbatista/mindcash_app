@@ -5664,6 +5664,21 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
     defaultValue: const Constant('BRL'),
   );
+  static const VerificationMeta _hasCompletedOnboardingMeta =
+      const VerificationMeta('hasCompletedOnboarding');
+  @override
+  late final GeneratedColumn<bool> hasCompletedOnboarding =
+      GeneratedColumn<bool>(
+        'has_completed_onboarding',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("has_completed_onboarding" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -5691,6 +5706,7 @@ class $AppSettingsTable extends AppSettings
     id,
     userName,
     currencyCode,
+    hasCompletedOnboarding,
     createdAt,
     updatedAt,
   ];
@@ -5723,6 +5739,15 @@ class $AppSettingsTable extends AppSettings
         currencyCode.isAcceptableOrUnknown(
           data['currency_code']!,
           _currencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('has_completed_onboarding')) {
+      context.handle(
+        _hasCompletedOnboardingMeta,
+        hasCompletedOnboarding.isAcceptableOrUnknown(
+          data['has_completed_onboarding']!,
+          _hasCompletedOnboardingMeta,
         ),
       );
     }
@@ -5763,6 +5788,10 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.string,
         data['${effectivePrefix}currency_code'],
       )!,
+      hasCompletedOnboarding: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}has_completed_onboarding'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -5784,12 +5813,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   final int id;
   final String userName;
   final String currencyCode;
+  final bool hasCompletedOnboarding;
   final DateTime createdAt;
   final DateTime updatedAt;
   const AppSetting({
     required this.id,
     required this.userName,
     required this.currencyCode,
+    required this.hasCompletedOnboarding,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -5799,6 +5830,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     map['id'] = Variable<int>(id);
     map['user_name'] = Variable<String>(userName);
     map['currency_code'] = Variable<String>(currencyCode);
+    map['has_completed_onboarding'] = Variable<bool>(hasCompletedOnboarding);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -5809,6 +5841,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: Value(id),
       userName: Value(userName),
       currencyCode: Value(currencyCode),
+      hasCompletedOnboarding: Value(hasCompletedOnboarding),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -5823,6 +5856,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       id: serializer.fromJson<int>(json['id']),
       userName: serializer.fromJson<String>(json['userName']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      hasCompletedOnboarding: serializer.fromJson<bool>(
+        json['hasCompletedOnboarding'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -5834,6 +5870,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'id': serializer.toJson<int>(id),
       'userName': serializer.toJson<String>(userName),
       'currencyCode': serializer.toJson<String>(currencyCode),
+      'hasCompletedOnboarding': serializer.toJson<bool>(hasCompletedOnboarding),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -5843,12 +5880,15 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     int? id,
     String? userName,
     String? currencyCode,
+    bool? hasCompletedOnboarding,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => AppSetting(
     id: id ?? this.id,
     userName: userName ?? this.userName,
     currencyCode: currencyCode ?? this.currencyCode,
+    hasCompletedOnboarding:
+        hasCompletedOnboarding ?? this.hasCompletedOnboarding,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -5859,6 +5899,9 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       currencyCode: data.currencyCode.present
           ? data.currencyCode.value
           : this.currencyCode,
+      hasCompletedOnboarding: data.hasCompletedOnboarding.present
+          ? data.hasCompletedOnboarding.value
+          : this.hasCompletedOnboarding,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -5870,6 +5913,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           ..write('id: $id, ')
           ..write('userName: $userName, ')
           ..write('currencyCode: $currencyCode, ')
+          ..write('hasCompletedOnboarding: $hasCompletedOnboarding, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -5877,8 +5921,14 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, userName, currencyCode, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    userName,
+    currencyCode,
+    hasCompletedOnboarding,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5886,6 +5936,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           other.id == this.id &&
           other.userName == this.userName &&
           other.currencyCode == this.currencyCode &&
+          other.hasCompletedOnboarding == this.hasCompletedOnboarding &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -5894,12 +5945,14 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<int> id;
   final Value<String> userName;
   final Value<String> currencyCode;
+  final Value<bool> hasCompletedOnboarding;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.userName = const Value.absent(),
     this.currencyCode = const Value.absent(),
+    this.hasCompletedOnboarding = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -5907,6 +5960,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.id = const Value.absent(),
     required String userName,
     this.currencyCode = const Value.absent(),
+    this.hasCompletedOnboarding = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : userName = Value(userName),
@@ -5916,6 +5970,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Expression<int>? id,
     Expression<String>? userName,
     Expression<String>? currencyCode,
+    Expression<bool>? hasCompletedOnboarding,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -5923,6 +5978,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       if (id != null) 'id': id,
       if (userName != null) 'user_name': userName,
       if (currencyCode != null) 'currency_code': currencyCode,
+      if (hasCompletedOnboarding != null)
+        'has_completed_onboarding': hasCompletedOnboarding,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -5932,6 +5989,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     Value<int>? id,
     Value<String>? userName,
     Value<String>? currencyCode,
+    Value<bool>? hasCompletedOnboarding,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -5939,6 +5997,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       id: id ?? this.id,
       userName: userName ?? this.userName,
       currencyCode: currencyCode ?? this.currencyCode,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -5956,6 +6016,11 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     if (currencyCode.present) {
       map['currency_code'] = Variable<String>(currencyCode.value);
     }
+    if (hasCompletedOnboarding.present) {
+      map['has_completed_onboarding'] = Variable<bool>(
+        hasCompletedOnboarding.value,
+      );
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5971,6 +6036,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
           ..write('id: $id, ')
           ..write('userName: $userName, ')
           ..write('currencyCode: $currencyCode, ')
+          ..write('hasCompletedOnboarding: $hasCompletedOnboarding, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -10626,6 +10692,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int> id,
       required String userName,
       Value<String> currencyCode,
+      Value<bool> hasCompletedOnboarding,
       required DateTime createdAt,
       required DateTime updatedAt,
     });
@@ -10634,6 +10701,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> userName,
       Value<String> currencyCode,
+      Value<bool> hasCompletedOnboarding,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -10659,6 +10727,11 @@ class $$AppSettingsTableFilterComposer
 
   ColumnFilters<String> get currencyCode => $composableBuilder(
     column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hasCompletedOnboarding => $composableBuilder(
+    column: $table.hasCompletedOnboarding,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10697,6 +10770,11 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get hasCompletedOnboarding => $composableBuilder(
+    column: $table.hasCompletedOnboarding,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10725,6 +10803,11 @@ class $$AppSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get currencyCode => $composableBuilder(
     column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get hasCompletedOnboarding => $composableBuilder(
+    column: $table.hasCompletedOnboarding,
     builder: (column) => column,
   );
 
@@ -10769,12 +10852,14 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> userName = const Value.absent(),
                 Value<String> currencyCode = const Value.absent(),
+                Value<bool> hasCompletedOnboarding = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 userName: userName,
                 currencyCode: currencyCode,
+                hasCompletedOnboarding: hasCompletedOnboarding,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -10783,12 +10868,14 @@ class $$AppSettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String userName,
                 Value<String> currencyCode = const Value.absent(),
+                Value<bool> hasCompletedOnboarding = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
               }) => AppSettingsCompanion.insert(
                 id: id,
                 userName: userName,
                 currencyCode: currencyCode,
+                hasCompletedOnboarding: hasCompletedOnboarding,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

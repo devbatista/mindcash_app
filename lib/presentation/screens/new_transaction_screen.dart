@@ -13,7 +13,9 @@ import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
 
 class NewTransactionScreen extends StatefulWidget {
-  const NewTransactionScreen({super.key});
+  const NewTransactionScreen({this.initialType = 'expense', super.key});
+
+  final String initialType;
 
   @override
   State<NewTransactionScreen> createState() => _NewTransactionScreenState();
@@ -27,12 +29,18 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
 
   Future<_TransactionFormData>? _formData;
 
-  String _type = 'expense';
+  late String _type;
   int? _categoryId;
   int? _sourceAccountId;
   int? _destinationAccountId;
   DateTime _date = DateTime.now();
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType;
+  }
 
   @override
   void dispose() {

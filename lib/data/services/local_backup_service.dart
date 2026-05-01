@@ -351,6 +351,9 @@ class LocalBackupService {
               id: Value(_int(map, 'id')),
               userName: _string(map, 'userName'),
               currencyCode: Value(_string(map, 'currencyCode')),
+              hasCompletedOnboarding: Value(
+                _optionalBool(map, 'hasCompletedOnboarding'),
+              ),
               createdAt: _date(map, 'createdAt'),
               updatedAt: _date(map, 'updatedAt'),
             ),
@@ -478,6 +481,7 @@ class LocalBackupService {
     'id': settings.id,
     'userName': settings.userName,
     'currencyCode': settings.currencyCode,
+    'hasCompletedOnboarding': settings.hasCompletedOnboarding,
     'createdAt': settings.createdAt.toIso8601String(),
     'updatedAt': settings.updatedAt.toIso8601String(),
   };
@@ -544,6 +548,18 @@ class LocalBackupService {
 
   bool _bool(Map<String, Object?> map, String key) {
     final value = map[key];
+    if (value is bool) {
+      return value;
+    }
+
+    throw ArgumentError('Campo "$key" inválido.');
+  }
+
+  bool _optionalBool(Map<String, Object?> map, String key) {
+    final value = map[key];
+    if (value == null) {
+      return false;
+    }
     if (value is bool) {
       return value;
     }

@@ -8,6 +8,9 @@ class AppSettings extends Table {
   TextColumn get currencyCode =>
       text().withLength(min: 3, max: 3).withDefault(const Constant('BRL'))();
 
+  BoolColumn get hasCompletedOnboarding =>
+      boolean().withDefault(const Constant(false))();
+
   DateTimeColumn get createdAt => dateTime()();
 
   DateTimeColumn get updatedAt => dateTime()();

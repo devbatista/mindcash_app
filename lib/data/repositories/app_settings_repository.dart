@@ -22,6 +22,7 @@ class AppSettingsRepository {
           AppSettingsCompanion.insert(
             userName: '',
             currencyCode: const Value('BRL'),
+            hasCompletedOnboarding: const Value(false),
             createdAt: now,
             updatedAt: now,
           ),
@@ -35,6 +36,7 @@ class AppSettingsRepository {
   Future<void> updateSettings({
     required String userName,
     required String currencyCode,
+    bool? hasCompletedOnboarding,
   }) async {
     final settings = await getSettings();
 
@@ -44,8 +46,20 @@ class AppSettingsRepository {
       AppSettingsCompanion(
         userName: Value(userName.trim()),
         currencyCode: Value(currencyCode),
+        hasCompletedOnboarding: Value.absentIfNull(hasCompletedOnboarding),
         updatedAt: Value(DateTime.now()),
       ),
+    );
+  }
+
+  Future<void> completeOnboarding({
+    required String userName,
+    required String currencyCode,
+  }) {
+    return updateSettings(
+      userName: userName,
+      currencyCode: currencyCode,
+      hasCompletedOnboarding: true,
     );
   }
 }

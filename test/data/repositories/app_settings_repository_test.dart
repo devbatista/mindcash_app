@@ -20,6 +20,7 @@ void main() {
 
     expect(settings.userName, isEmpty);
     expect(settings.currencyCode, 'BRL');
+    expect(settings.hasCompletedOnboarding, isFalse);
   });
 
   test('updates user name and currency', () async {
@@ -29,5 +30,17 @@ void main() {
 
     expect(settings.userName, 'Rafael');
     expect(settings.currencyCode, 'BRL');
+  });
+
+  test('marks onboarding as completed', () async {
+    await repository.completeOnboarding(
+      userName: 'Rafael',
+      currencyCode: 'BRL',
+    );
+
+    final settings = await repository.getSettings();
+
+    expect(settings.userName, 'Rafael');
+    expect(settings.hasCompletedOnboarding, isTrue);
   });
 }

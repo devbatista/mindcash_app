@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:mindcash_app/data/database/tables/accounts_table.dart';
 import 'package:mindcash_app/data/database/tables/app_settings_table.dart';
 import 'package:mindcash_app/data/database/tables/categories_table.dart';
@@ -27,12 +28,12 @@ part 'app_database.g.dart';
 final class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  AppDatabase.defaults() : super(driftDatabase(name: 'mindcash'));
+  AppDatabase.defaults() : super(_openPersistentDatabase());
 
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -42,7 +43,42 @@ final class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.createTable(appSettings);
         }
+        if (from < 3) {
+          await m.addColumn(appSettings, appSettings.hasCompletedOnboarding);
+        }
       },
     );
   }
+}
+
+QueryExecutor _openPersistentDatabase() {
+  final baseDirectory = _persistentDatabaseDirectory();
+
+  if (!baseDirectory.existsSync()) {
+    baseDirectory.createSync(recursive: true);
+  }
+
+  return NativeDatabase.createInBackground(
+    File('${baseDirectory.path}/mindcash.sqlite'),
+  );
+}
+
+Directory _persistentDatabaseDirectory() {
+  final environment = Platform.environment;
+  final home = environment['HOME'] ?? environment['CFFIXED_USER_HOME'];
+
+  if (home != null && home.isNotEmpty) {
+    return Directory('$home/Library/Application Support/MindCash');
+  }
+
+  final temporaryDirectory = environment['TMPDIR'];
+  if (temporaryDirectory != null && temporaryDirectory.isNotEmpty) {
+    final sandboxRoot = Directory(temporaryDirectory).parent;
+
+    return Directory(
+      '${sandboxRoot.path}/Library/Application Support/MindCash',
+    );
+  }
+
+  return Directory('${Directory.systemTemp.path}/MindCash');
 }

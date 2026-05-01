@@ -2,36 +2,88 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
+import 'package:mindcash_app/data/repositories/app_settings_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
 import 'package:mindcash_app/data/repositories/credit_card_repository.dart';
 import 'package:mindcash_app/data/repositories/recurrence_repository.dart';
 import 'package:mindcash_app/data/repositories/transaction_repository.dart';
+import 'package:mindcash_app/data/services/local_backup_service.dart';
 import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 
 void main() {
   late AppDatabase database;
 
-  setUp(() {
+  setUp(() async {
     database = AppDatabase.memory();
+    await AppSettingsRepository(
+      database,
+    ).completeOnboarding(userName: 'DevBatista', currencyCode: 'BRL');
   });
 
   tearDown(() async {
     await database.close();
   });
 
+  Future<void> pumpMindCashApp(
+    WidgetTester tester, {
+    AppDatabase? appDatabase,
+  }) async {
+    await tester.pumpWidget(MindCashApp(database: appDatabase ?? database));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openNewTransaction(
+    WidgetTester tester, {
+    String type = 'Despesa',
+  }) async {
+    await tester.tap(find.widgetWithText(FilledButton, 'Novo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(type));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('shows the MindCash app shell', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     expect(find.text('Olá, DevBatista'), findsOneWidget);
     expect(find.text('Saldo total'), findsOneWidget);
     expect(find.text('R\$ 0,00'), findsWidgets);
-    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.text('Novo'), findsOneWidget);
+  });
+
+  testWidgets('completes initial onboarding', (tester) async {
+    await LocalBackupService(database).resetAllData();
+
+    await pumpMindCashApp(tester);
+
+    expect(find.text('MindCash'), findsOneWidget);
+    expect(find.text('Nome do usuário'), findsOneWidget);
+    expect(find.text('Conta inicial'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'Rafael');
+    await tester.enterText(find.byType(TextFormField).at(1), 'Banco');
+    await tester.enterText(find.byType(TextFormField).at(2), '4500');
+    await tester.ensureVisible(find.text('Começar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Começar'));
+    await tester.pumpAndSettle();
+
+    final settings = await AppSettingsRepository(database).getSettings();
+    final accounts = await AccountRepository(database).listActiveAccounts();
+    final categories = await CategoryRepository(
+      database,
+    ).listActiveCategories();
+
+    expect(settings.hasCompletedOnboarding, isTrue);
+    expect(settings.userName, 'Rafael');
+    expect(accounts, hasLength(1));
+    expect(accounts.single.name, 'Banco');
+    expect(accounts.single.initialBalanceCents, 4500);
+    expect(categories, isNotEmpty);
   });
 
   testWidgets('navigates between main sections', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Transações'));
     await tester.pumpAndSettle();
@@ -39,7 +91,7 @@ void main() {
     expect(find.text('Nenhuma transação encontrada'), findsOneWidget);
   });
 
-  testWidgets('opens new transaction route from action button', (tester) async {
+  testWidgets('opens new transaction route from create menu', (tester) async {
     await AccountRepository(
       database,
     ).createAccount(name: 'Carteira', type: 'wallet');
@@ -47,11 +99,9 @@ void main() {
       database,
     ).createCategory(name: 'Mercado', type: 'expense');
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
+    await openNewTransaction(tester);
 
     expect(find.text('Nova transação'), findsWidgets);
     expect(find.text('Valor'), findsOneWidget);
@@ -66,11 +116,9 @@ void main() {
       database,
     ).createCategory(name: 'Mercado', type: 'expense');
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
+    await openNewTransaction(tester);
 
     await tester.enterText(find.byType(TextFormField).at(0), '12345');
     await tester.enterText(find.byType(TextFormField).at(1), 'Compra do mês');
@@ -88,8 +136,7 @@ void main() {
   });
 
   testWidgets('toggles dashboard amount visibility', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.byTooltip('Ocultar valores'));
     await tester.pump();
@@ -99,8 +146,7 @@ void main() {
   });
 
   testWidgets('changes dashboard month from selector', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
     await tester.pumpAndSettle();
@@ -135,8 +181,7 @@ void main() {
       categoryId: category.id,
     );
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
     await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pumpAndSettle();
 
@@ -169,8 +214,7 @@ void main() {
       sourceAccountId: account.id,
     );
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Transações'));
     await tester.pumpAndSettle();
@@ -191,8 +235,7 @@ void main() {
   });
 
   testWidgets('creates account from accounts screen', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Contas').last);
     await tester.pumpAndSettle();
@@ -221,8 +264,7 @@ void main() {
       sourceAccountId: account.id,
     );
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Contas').last);
     await tester.pumpAndSettle();
@@ -239,8 +281,7 @@ void main() {
   });
 
   testWidgets('creates credit card from cards screen', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Cartões').last);
     await tester.pumpAndSettle();
@@ -271,8 +312,7 @@ void main() {
       database,
     ).createCategory(name: 'Assinaturas', type: 'expense');
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Mais').last);
     await tester.pump(const Duration(milliseconds: 300));
@@ -304,8 +344,7 @@ void main() {
       database,
     ).createCategory(name: 'Mercado', type: 'expense');
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Mais').last);
     await tester.pumpAndSettle();
@@ -339,8 +378,7 @@ void main() {
       categoryId: category.id,
     );
 
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Mais').last);
     await tester.pump(const Duration(milliseconds: 300));
@@ -356,8 +394,7 @@ void main() {
   });
 
   testWidgets('shows backup tab and exports JSON', (tester) async {
-    await tester.pumpWidget(MindCashApp(database: database));
-    await tester.pump();
+    await pumpMindCashApp(tester);
 
     await tester.tap(find.text('Mais').last);
     await tester.pump(const Duration(milliseconds: 300));

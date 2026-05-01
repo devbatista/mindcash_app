@@ -55,19 +55,20 @@ class _AppShellState extends State<AppShell> {
     final isDashboard = _currentIndex == 0;
 
     return Scaffold(
-      appBar: isDashboard ? null : AppBar(title: Text(screen.title)),
-      body: SafeArea(child: _buildBody()),
-      floatingActionButton: SizedBox(
-        width: 64,
-        height: 64,
-        child: FloatingActionButton(
-          shape: const CircleBorder(),
-          onPressed: _openNewTransaction,
-          tooltip: 'Nova transação',
-          child: const Icon(Icons.add, size: 32),
-        ),
+      appBar: AppBar(
+        title: Text(isDashboard ? 'MindCash' : screen.title),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilledButton.icon(
+              onPressed: _openCreateMenu,
+              icon: const Icon(Icons.add),
+              label: const Text('Novo'),
+            ),
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      body: SafeArea(child: _buildBody()),
       bottomNavigationBar: NavigationBar(
         height: 82,
         selectedIndex: _currentIndex,
@@ -124,10 +125,66 @@ class _AppShellState extends State<AppShell> {
     };
   }
 
-  void _openNewTransaction() {
+  Future<void> _openCreateMenu() {
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Novo lançamento',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 12),
+                _CreateActionTile(
+                  icon: Icons.arrow_downward,
+                  color: Colors.red,
+                  title: 'Despesa',
+                  subtitle: 'Registrar um gasto ou pagamento',
+                  onTap: () => _selectCreateAction(context, 'expense'),
+                ),
+                _CreateActionTile(
+                  icon: Icons.arrow_upward,
+                  color: Colors.green,
+                  title: 'Receita',
+                  subtitle: 'Registrar dinheiro recebido',
+                  onTap: () => _selectCreateAction(context, 'income'),
+                ),
+                _CreateActionTile(
+                  icon: Icons.swap_horiz,
+                  color: Colors.blue,
+                  title: 'Transferência',
+                  subtitle: 'Mover saldo entre contas',
+                  onTap: () => _selectCreateAction(context, 'transfer'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _selectCreateAction(BuildContext sheetContext, String type) {
+    Navigator.of(sheetContext).pop();
+    _openNewTransaction(type);
+  }
+
+  void _openNewTransaction(String initialType) {
     Navigator.of(context)
         .push<bool>(
-          MaterialPageRoute<bool>(builder: (_) => const NewTransactionScreen()),
+          MaterialPageRoute<bool>(
+            builder: (_) => NewTransactionScreen(initialType: initialType),
+          ),
         )
         .then((saved) {
           if (saved ?? false) {
@@ -147,4 +204,47 @@ class _ShellScreen {
   final String title;
   final IconData icon;
   final IconData selectedIcon;
+}
+
+class _CreateActionTile extends StatelessWidget {
+  const _CreateActionTile({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        child: ListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          leading: CircleAvatar(
+            backgroundColor: color.withValues(alpha: 0.12),
+            foregroundColor: color,
+            child: Icon(icon),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
+          subtitle: Text(subtitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
+import 'package:mindcash_app/data/repositories/app_settings_repository.dart';
 import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 import 'package:mindcash_app/domain/models/dashboard_summary.dart';
 
@@ -10,6 +11,7 @@ class DashboardService {
 
   Future<DashboardSummary> getSummary({DateTime? month}) async {
     final selectedMonth = month ?? DateTime.now();
+    final settings = await AppSettingsRepository(_database).getSettings();
     final accountRepository = AccountRepository(_database);
     final transactionRepository = TransactionRepository(_database);
 
@@ -40,7 +42,9 @@ class DashboardService {
     );
 
     return DashboardSummary(
-      userName: 'DevBatista',
+      userName: settings.userName.trim().isEmpty
+          ? 'DevBatista'
+          : settings.userName,
       monthLabel: _formatMonth(selectedMonth),
       totalBalanceCents: await transactionRepository.calculateTotalBalance(),
       accountsBalanceCents: accountCards.fold<int>(
