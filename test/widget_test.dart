@@ -275,6 +275,8 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Mais').last);
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Recorrências'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Criar recorrência'));
@@ -297,6 +299,30 @@ void main() {
     expect(find.text('Streaming'), findsOneWidget);
   });
 
+  testWidgets('shows settings tab without staying on loading', (tester) async {
+    await CategoryRepository(
+      database,
+    ).createCategory(name: 'Mercado', type: 'expense');
+
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Mais').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Preferências'), findsOneWidget);
+    expect(find.text('Nome do usuário'), findsOneWidget);
+    expect(find.text('Moeda padrão'), findsOneWidget);
+    expect(find.text('Categorias'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dados locais'), findsOneWidget);
+    expect(find.text('Sobre o app'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets('shows reports tab with monthly summary', (tester) async {
     final account = await AccountRepository(
       database,
@@ -317,7 +343,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Mais').last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Relatórios'));
     await tester.pumpAndSettle();
 
@@ -334,7 +360,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Mais').last);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Backup'));
     await tester.pumpAndSettle();
 

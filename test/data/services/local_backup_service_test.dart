@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mindcash_app/data/database/app_database.dart';
 import 'package:mindcash_app/data/repositories/account_repository.dart';
+import 'package:mindcash_app/data/repositories/app_settings_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
 import 'package:mindcash_app/data/repositories/credit_card_repository.dart';
 import 'package:mindcash_app/data/repositories/recurrence_repository.dart';
@@ -53,6 +54,21 @@ void main() {
     expect(data['categories'], hasLength(1));
     expect(data['transactions'], hasLength(1));
     expect(data['creditCards'], hasLength(1));
+  });
+
+  test('exports and imports app settings', () async {
+    await AppSettingsRepository(
+      database,
+    ).updateSettings(userName: 'Rafael', currencyCode: 'BRL');
+    final backup = await service.exportJson();
+
+    await service.resetAllData();
+    await service.importJson(backup);
+
+    final settings = await AppSettingsRepository(database).getSettings();
+
+    expect(settings.userName, 'Rafael');
+    expect(settings.currencyCode, 'BRL');
   });
 
   test('imports JSON backup and creates safety backup first', () async {

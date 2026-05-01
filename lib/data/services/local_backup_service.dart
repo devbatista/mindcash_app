@@ -34,6 +34,9 @@ class LocalBackupService {
         'recurrences': (await _database.select(_database.recurrences).get())
             .map(_recurrenceToJson)
             .toList(),
+        'appSettings': (await _database.select(_database.appSettings).get())
+            .map(_appSettingToJson)
+            .toList(),
       },
     };
 
@@ -136,12 +139,18 @@ class LocalBackupService {
       await _restoreInvoices(_list(data, 'invoices'));
       await _restoreInstallments(_list(data, 'installments'));
       await _restoreRecurrences(_list(data, 'recurrences'));
+      await _restoreAppSettings(_optionalList(data, 'appSettings'));
     });
 
     return BackupImportResult(safetyBackupJson: safetyBackupJson);
   }
 
+  Future<void> resetAllData() async {
+    await _database.transaction(_clearDatabase);
+  }
+
   Future<void> _clearDatabase() async {
+    await _database.delete(_database.appSettings).go();
     await _database.delete(_database.recurrences).go();
     await _database.delete(_database.installments).go();
     await _database.delete(_database.invoices).go();
@@ -332,6 +341,23 @@ class LocalBackupService {
     }
   }
 
+  Future<void> _restoreAppSettings(List<Object?> rows) async {
+    for (final row in rows) {
+      final map = _map(row);
+      await _database
+          .into(_database.appSettings)
+          .insert(
+            AppSettingsCompanion.insert(
+              id: Value(_int(map, 'id')),
+              userName: _string(map, 'userName'),
+              currencyCode: Value(_string(map, 'currencyCode')),
+              createdAt: _date(map, 'createdAt'),
+              updatedAt: _date(map, 'updatedAt'),
+            ),
+          );
+    }
+  }
+
   Map<String, Object?> _accountToJson(Account account) => {
     'id': account.id,
     'uuid': account.uuid,
@@ -448,8 +474,28 @@ class LocalBackupService {
     'deletedAt': recurrence.deletedAt?.toIso8601String(),
   };
 
+  Map<String, Object?> _appSettingToJson(AppSetting settings) => {
+    'id': settings.id,
+    'userName': settings.userName,
+    'currencyCode': settings.currencyCode,
+    'createdAt': settings.createdAt.toIso8601String(),
+    'updatedAt': settings.updatedAt.toIso8601String(),
+  };
+
   List<Object?> _list(Map<String, Object?> data, String key) {
     return data[key]! as List<Object?>;
+  }
+
+  List<Object?> _optionalList(Map<String, Object?> data, String key) {
+    final value = data[key];
+    if (value == null) {
+      return const [];
+    }
+    if (value is List<Object?>) {
+      return value;
+    }
+
+    throw ArgumentError('A lista "$key" é inválida.');
   }
 
   Map<String, Object?> _map(Object? row) {

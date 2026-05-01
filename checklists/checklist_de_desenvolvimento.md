@@ -280,13 +280,13 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 17. Configurações
 
-- [ ] Nome do usuário
-- [ ] Moeda padrão: BRL
-- [ ] Gerenciar categorias
-- [ ] Gerenciar dados locais
-- [ ] Exportar backup
-- [ ] Resetar dados com confirmação
-- [ ] Sobre o app
+- [x] Nome do usuário
+- [x] Moeda padrão: BRL
+- [x] Gerenciar categorias
+- [x] Gerenciar dados locais
+- [x] Exportar backup
+- [x] Resetar dados com confirmação
+- [x] Sobre o app
 
 ---
 
