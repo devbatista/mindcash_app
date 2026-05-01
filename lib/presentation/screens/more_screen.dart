@@ -6,12 +6,13 @@ import 'package:mindcash_app/data/repositories/account_repository.dart';
 import 'package:mindcash_app/data/repositories/category_repository.dart';
 import 'package:mindcash_app/data/repositories/recurrence_repository.dart';
 import 'package:mindcash_app/presentation/app/app_dependencies.dart';
+import 'package:mindcash_app/presentation/screens/backup_screen.dart';
+import 'package:mindcash_app/presentation/screens/reports_screen.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
-import 'package:mindcash_app/presentation/screens/reports_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -19,17 +20,20 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           TabBar(
             tabs: [
               Tab(text: 'Recorrências'),
               Tab(text: 'Relatórios'),
+              Tab(text: 'Backup'),
             ],
           ),
           Expanded(
-            child: TabBarView(children: [_RecurrencesTab(), ReportsScreen()]),
+            child: TabBarView(
+              children: [_RecurrencesTab(), ReportsScreen(), BackupScreen()],
+            ),
           ),
         ],
       ),

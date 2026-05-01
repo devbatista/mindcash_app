@@ -328,4 +328,23 @@ void main() {
     expect(find.text('Gastos por categoria'), findsOneWidget);
     expect(find.text('Mercado'), findsOneWidget);
   });
+
+  testWidgets('shows backup tab and exports JSON', (tester) async {
+    await tester.pumpWidget(MindCashApp(database: database));
+    await tester.pump();
+
+    await tester.tap(find.text('Mais').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Backup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Exportar JSON'), findsOneWidget);
+    expect(find.text('Importar JSON'), findsOneWidget);
+
+    await tester.tap(find.text('Gerar').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Backup JSON'), findsWidgets);
+    expect(find.textContaining('backupVersion'), findsOneWidget);
+  });
 }

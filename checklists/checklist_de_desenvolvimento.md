@@ -270,11 +270,11 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 16. Backup local
 
-- [ ] Exportar JSON
-- [ ] Importar JSON
-- [ ] Exportar CSV
-- [ ] Validar arquivo antes de importar
-- [ ] Criar backup antes de importar dados
+- [x] Exportar JSON
+- [x] Importar JSON
+- [x] Exportar CSV
+- [x] Validar arquivo antes de importar
+- [x] Criar backup antes de importar dados
 
 ---
 
