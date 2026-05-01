@@ -7,6 +7,8 @@ import 'package:mindcash_app/presentation/screens/dashboard_screen.dart';
 import 'package:mindcash_app/presentation/screens/more_screen.dart';
 import 'package:mindcash_app/presentation/screens/new_transaction_screen.dart';
 import 'package:mindcash_app/presentation/screens/transactions_screen.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -91,8 +93,16 @@ class _AppShellState extends State<AppShell> {
           AppDependencies.databaseOf(context),
         ).getSummary(month: _selectedDashboardMonth),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return ErrorState(
+              title: 'Não foi possível carregar o dashboard',
+              message: 'Tente novamente em instantes.',
+              onRetry: () => setState(() {}),
+            );
+          }
+
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingState(message: 'Carregando dashboard...');
           }
 
           return DashboardScreen(

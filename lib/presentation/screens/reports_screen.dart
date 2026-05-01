@@ -7,6 +7,8 @@ import 'package:mindcash_app/domain/models/report_summary.dart';
 import 'package:mindcash_app/domain/services/report_service.dart';
 import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -27,8 +29,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return FutureBuilder<_ReportScreenData>(
       future: _loadData(database),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorState(
+            title: 'Não foi possível carregar os relatórios',
+            message: 'Ajuste os filtros ou tente novamente.',
+            onRetry: () => setState(() {}),
+          );
+        }
+
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingState(message: 'Carregando relatórios...');
         }
 
         final data = snapshot.data!;

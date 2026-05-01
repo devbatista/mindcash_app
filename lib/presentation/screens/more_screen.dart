@@ -12,6 +12,8 @@ import 'package:mindcash_app/presentation/screens/settings_screen.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
 
@@ -69,8 +71,16 @@ class _RecurrencesTabState extends State<_RecurrencesTab> {
       builder: (context, snapshot) {
         final recurrences = snapshot.data ?? [];
 
+        if (snapshot.hasError) {
+          return ErrorState(
+            title: 'Não foi possível carregar as recorrências',
+            message: 'Confira os dados locais e tente novamente.',
+            onRetry: () => setState(() {}),
+          );
+        }
+
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingState(message: 'Carregando recorrências...');
         }
 
         if (recurrences.isEmpty) {
@@ -292,10 +302,18 @@ class _RecurrenceFormSheetState extends State<_RecurrenceFormSheet> {
     return FutureBuilder<_RecurrenceFormData>(
       future: _formData,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorState(
+            title: 'Não foi possível carregar a recorrência',
+            message: 'Confira contas e categorias locais e tente novamente.',
+            onRetry: () => setState(() => _formData = _loadFormData()),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.all(32),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingState(message: 'Carregando recorrência...'),
           );
         }
 

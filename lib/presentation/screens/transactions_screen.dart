@@ -6,6 +6,8 @@ import 'package:mindcash_app/data/repositories/transaction_repository.dart';
 import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
 import 'package:mindcash_app/presentation/widgets/transaction_list_item.dart';
 
@@ -59,17 +61,39 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               },
             ),
             Expanded(
-              child: snapshot.connectionState == ConnectionState.waiting
-                  ? const Center(child: CircularProgressIndicator())
-                  : _TransactionList(
-                      transactions: transactions,
-                      repository: repository,
-                      onChanged: () => setState(() {}),
-                    ),
+              child: _buildTransactionContent(
+                snapshot,
+                transactions,
+                repository,
+              ),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTransactionContent(
+    AsyncSnapshot<List<Transaction>> snapshot,
+    List<Transaction> transactions,
+    TransactionRepository repository,
+  ) {
+    if (snapshot.hasError) {
+      return ErrorState(
+        title: 'Não foi possível carregar as transações',
+        message: 'Ajuste os filtros ou tente novamente.',
+        onRetry: () => setState(() {}),
+      );
+    }
+
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const LoadingState(message: 'Carregando transações...');
+    }
+
+    return _TransactionList(
+      transactions: transactions,
+      repository: repository,
+      onChanged: () => setState(() {}),
     );
   }
 }

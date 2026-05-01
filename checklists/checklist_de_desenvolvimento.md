@@ -307,13 +307,13 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 19. Polimento
 
-- [ ] Melhorar loading states
-- [ ] Melhorar empty states
-- [ ] Revisar mensagens de erro
-- [ ] Revisar feedback visual
-- [ ] Revisar fluxo com uma mão
-- [ ] Revisar performance com muitos registros
-- [ ] Revisar acessibilidade básica
+- [x] Melhorar loading states
+- [x] Melhorar empty states
+- [x] Revisar mensagens de erro
+- [x] Revisar feedback visual
+- [x] Revisar fluxo com uma mão
+- [x] Revisar performance com muitos registros
+- [x] Revisar acessibilidade básica
 
 ---
 

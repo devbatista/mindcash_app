@@ -10,6 +10,8 @@ import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
 
@@ -32,8 +34,16 @@ class _CardsScreenState extends State<CardsScreen> {
       builder: (context, snapshot) {
         final cards = snapshot.data ?? [];
 
+        if (snapshot.hasError) {
+          return ErrorState(
+            title: 'Não foi possível carregar os cartões',
+            message: 'Confira os dados locais e tente novamente.',
+            onRetry: () => setState(() {}),
+          );
+        }
+
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingState(message: 'Carregando cartões...');
         }
 
         if (cards.isEmpty) {
@@ -524,10 +534,18 @@ class _InstallmentPurchaseFormSheetState
     return FutureBuilder<_InstallmentFormData>(
       future: _formData,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorState(
+            title: 'Não foi possível carregar a compra parcelada',
+            message: 'Confira contas, cartões e categorias locais.',
+            onRetry: () => setState(() => _formData = _loadFormData()),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.all(32),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingState(message: 'Carregando compra parcelada...'),
           );
         }
 
@@ -842,7 +860,7 @@ class _InvoiceDetailsSheetState extends State<_InvoiceDetailsSheet> {
                 ),
                 const SizedBox(height: 16),
                 if (summary == null)
-                  const Center(child: CircularProgressIndicator())
+                  const LoadingState(message: 'Carregando fatura...')
                 else ...[
                   _InvoiceSummaryHeader(summary: summary),
                   const SizedBox(height: 16),

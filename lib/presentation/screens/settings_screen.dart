@@ -9,6 +9,8 @@ import 'package:mindcash_app/data/services/local_backup_service.dart';
 import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -55,20 +57,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       future: _settingsData,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: EmptyState(
-                icon: Icons.error_outline,
-                title: 'Não foi possível carregar as configurações',
-                message: snapshot.error.toString(),
-              ),
-            ),
+          return ErrorState(
+            title: 'Não foi possível carregar as configurações',
+            message: 'Confira os dados locais e tente novamente.',
+            onRetry: () => setState(() => _settingsData = _loadData()),
           );
         }
 
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingState(message: 'Carregando configurações...');
         }
 
         final data = snapshot.data!;

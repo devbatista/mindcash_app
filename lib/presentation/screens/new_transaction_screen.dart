@@ -7,6 +7,8 @@ import 'package:mindcash_app/presentation/app/app_dependencies.dart';
 import 'package:mindcash_app/presentation/widgets/app_text_field.dart';
 import 'package:mindcash_app/presentation/widgets/date_picker_field.dart';
 import 'package:mindcash_app/presentation/widgets/empty_state.dart';
+import 'package:mindcash_app/presentation/widgets/error_state.dart';
+import 'package:mindcash_app/presentation/widgets/loading_state.dart';
 import 'package:mindcash_app/presentation/widgets/money_field.dart';
 import 'package:mindcash_app/presentation/widgets/primary_button.dart';
 
@@ -54,8 +56,17 @@ class _NewTransactionScreenState extends State<NewTransactionScreen> {
         child: FutureBuilder<_TransactionFormData>(
           future: _formData,
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return ErrorState(
+                title: 'Não foi possível carregar o formulário',
+                message:
+                    'Confira contas e categorias locais e tente novamente.',
+                onRetry: () => setState(() => _formData = _loadFormData()),
+              );
+            }
+
             if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return const LoadingState(message: 'Carregando formulário...');
             }
 
             final data = snapshot.data!;
