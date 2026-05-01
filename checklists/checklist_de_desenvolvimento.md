@@ -19,7 +19,7 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 - [x] Definir nome final do app: MindCash
 - [x] Configurar package name: `com.devbatista.mindcash`
 - [ ] Rodar app base no Android
-- [ ] Rodar app base no iOS
+- [x] Rodar app base no iOS
 - [x] Remover template padrão do contador
 - [x] Configurar título do app
 - [x] Definir tema base com Material 3
