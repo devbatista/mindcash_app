@@ -10,7 +10,7 @@ import 'package:mindcash_app/presentation/app/mindcash_app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final database = AppDatabase.memory();
+  final database = AppDatabase.defaults();
   await _seedDefaultData(database);
   await RecurrenceRepository(database).executePendingRecurrences();
 
