@@ -292,16 +292,16 @@ App financeiro pessoal em Flutter, offline-first, simples de usar e preparado pa
 
 ## 18. Testes
 
-- [ ] Testar criação de conta
-- [ ] Testar criação de categoria
-- [ ] Testar criação de transação
-- [ ] Testar saldo por conta
-- [ ] Testar saldo total
-- [ ] Testar transferência entre contas
-- [ ] Testar resumo mensal
-- [ ] Testar regras de fatura
-- [ ] Testar parcelamento
-- [ ] Testar recorrência
+- [x] Testar criação de conta
+- [x] Testar criação de categoria
+- [x] Testar criação de transação
+- [x] Testar saldo por conta
+- [x] Testar saldo total
+- [x] Testar transferência entre contas
+- [x] Testar resumo mensal
+- [x] Testar regras de fatura
+- [x] Testar parcelamento
+- [x] Testar recorrência
 
 ---
 

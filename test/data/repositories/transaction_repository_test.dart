@@ -201,6 +201,42 @@ void main() {
     expect(result, 75000);
   });
 
+  test('creates transfer between accounts and updates both balances', () async {
+    final checking = await accountRepository.createAccount(
+      name: 'Conta corrente',
+      type: 'checking',
+      initialBalanceCents: 100000,
+    );
+    final wallet = await accountRepository.createAccount(
+      name: 'Carteira',
+      type: 'wallet',
+      initialBalanceCents: 10000,
+    );
+
+    final transfer = await transactionRepository.createTransfer(
+      amountCents: 25000,
+      description: 'Saque',
+      date: DateTime(2026, 4, 20),
+      sourceAccountId: checking.id,
+      destinationAccountId: wallet.id,
+    );
+
+    final checkingBalance = await transactionRepository.calculateAccountBalance(
+      checking.id,
+    );
+    final walletBalance = await transactionRepository.calculateAccountBalance(
+      wallet.id,
+    );
+    final totalBalance = await transactionRepository.calculateTotalBalance();
+
+    expect(transfer.type, 'transfer');
+    expect(transfer.sourceAccountId, checking.id);
+    expect(transfer.destinationAccountId, wallet.id);
+    expect(checkingBalance, 75000);
+    expect(walletBalance, 35000);
+    expect(totalBalance, 110000);
+  });
+
   test('requires destination account for transfers', () async {
     final account = await accountRepository.createAccount(
       name: 'Conta corrente',
